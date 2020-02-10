@@ -28,9 +28,9 @@ Memberships and awards
 
 * Awarded the 1997 Prize Fellowship of the President of Russia.
 
-* Member of the Program Committees of IAWS-2009, IMECS-2011, 2012, 2013, ICAFS  2010, ICCA-2007, ICSCCW  2011, ICOR  2008, WPMSIIP  2009, ICSCCW  2011, IHMSC-2011, SCM-2011-2015, WICECS-2011, REC-2012, 2014, 2016, FSSCEF-2004, ISIPTA-1999-2015, QR2MSE-2016 & WCEAM-2016.
+* Member of the Program Committees of IAWS-2009; IMECS-2011,2012, 2013; ICAFS-2010; ICCA-2007; ICSCCW-2011; ICOR-2008; WPMSIIP-2009; ICSCCW-2011; IHMSC-2011,2017; SCM-2011-2016; WICECS-2011; REC-2012,2014,2016; FSSCEF-2004; ISIPTA-1999-2019, CSA 2016, QR2MSE-2016 & WCEAM-2016, ICSC-2017, IHMSC 2018, AAAI-2019.
 
-* Member of Editorial Board of [International Journal of Approximate Reasoning](http://www.elsevier.com/wps/find/journaldescription.cws_home/505787/description#description), ISRN Artificial Intelligence, Dependability, Izvestia of the Forest Technical Academy, SPIIRAN Proceedings.
+* Member of Editorial Board of [International Journal of Approximate Reasoning](http://www.elsevier.com/wps/find/journaldescription.cws_home/505787/description#description), Dependability, Izvestia of the Forest Technical Academy, SPIIRAN Proceedings, European Journal of Technology and Design, Bulletin of the South Ural State University, series «Mathematics. Mechanics. Physics», Bulletin of the South Ural State University», series «Mathematical Modelling, Programming & Computer Software», [CAAI Transactions on Intelligence Technology](https://digital-library.theiet.org/content/journals/trit)
 
 * Member of the [Society for Imprecise Probability Theory and Applications (SIPTA)](http://www.sipta.org/).
 
