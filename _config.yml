@@ -10,7 +10,7 @@ locale                   : "en-US"
 title                    : "Home page of Lev V. Utkin"
 title_separator          : "-"
 name                     : "Lev Utkin"
-description              : "Professor of the Telematics Department in Peter the Great St.Petersburg Polytechnic University"
+description              : "Professor, Head of the Higher School of Applied Mathematics and Computational Physics"
 url                      : 
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "academicpages/academicpages.github.io"
@@ -82,7 +82,7 @@ analytics:
 author:
   name             : "Lev Utkin"
   avatar           : "profile.png"
-  bio              : "Professor of the Telematics Department in Peter the Great St.Petersburg Polytechnic University"
+  bio              : "Professor, Head of the Higher School of Applied Mathematics and Computational Physics"
   location         : "St. Petersburg"
   employer         : 
   pubmed           : 
