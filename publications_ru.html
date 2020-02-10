@@ -1,0 +1,2992 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>JabRef references</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<script type="text/javascript">
+<!--
+// QuickSearch script for JabRef HTML export 
+// Version: 3.0
+//
+// Copyright (c) 2006-2011, Mark Schenk
+//
+// This software is distributed under a Creative Commons Attribution 3.0 License
+// http://creativecommons.org/licenses/by/3.0/
+//
+// Features:
+// - intuitive find-as-you-type searching
+//    ~ case insensitive
+//    ~ ignore diacritics (optional)
+//
+// - search with/without Regular Expressions
+// - match BibTeX key
+//
+
+// Search settings
+var searchAbstract = true;	// search in abstract
+var searchReview = true;	// search in review
+
+var noSquiggles = true; 	// ignore diacritics when searching
+var searchRegExp = false; 	// enable RegExp searches
+
+
+if (window.addEventListener) {
+	window.addEventListener("load",initSearch,false); }
+else if (window.attachEvent) {
+	window.attachEvent("onload", initSearch); }
+
+function initSearch() {
+	// check for quick search table and searchfield
+	if (!document.getElementById('qs_table')||!document.getElementById('quicksearch')) { return; }
+
+	// load all the rows and sort into arrays
+	loadTableData();
+	
+	//find the query field
+	qsfield = document.getElementById('qs_field');
+
+	// previous search term; used for speed optimisation
+	prevSearch = '';
+
+	//find statistics location
+	stats = document.getElementById('stat');
+	setStatistics(-1);
+	
+	// set up preferences
+	initPreferences();
+
+	// shows the searchfield
+	document.getElementById('quicksearch').style.display = 'block';
+	document.getElementById('qs_field').onkeyup = quickSearch;
+}
+
+function loadTableData() {
+	// find table and appropriate rows
+	searchTable = document.getElementById('qs_table');
+	var allRows = searchTable.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+	// split all rows into entryRows and infoRows (e.g. abstract, review, bibtex)
+	entryRows = new Array(); infoRows = new Array(); absRows = new Array(); revRows = new Array();
+
+	// get data from each row
+	entryRowsData = new Array(); absRowsData = new Array(); revRowsData = new Array(); 
+	
+	BibTeXKeys = new Array();
+	
+	for (var i=0, k=0, j=0; i<allRows.length;i++) {
+		if (allRows[i].className.match(/entry/)) {
+			entryRows[j] = allRows[i];
+			entryRowsData[j] = stripDiacritics(getTextContent(allRows[i]));
+			allRows[i].id ? BibTeXKeys[j] = allRows[i].id : allRows[i].id = 'autokey_'+j;
+			j ++;
+		} else {
+			infoRows[k++] = allRows[i];
+			// check for abstract/review
+			if (allRows[i].className.match(/abstract/)) {
+				absRows.push(allRows[i]);
+				absRowsData[j-1] = stripDiacritics(getTextContent(allRows[i]));
+			} else if (allRows[i].className.match(/review/)) {
+				revRows.push(allRows[i]);
+				revRowsData[j-1] = stripDiacritics(getTextContent(allRows[i]));
+			}
+		}
+	}
+	//number of entries and rows
+	numEntries = entryRows.length;
+	numInfo = infoRows.length;
+	numAbs = absRows.length;
+	numRev = revRows.length;
+}
+
+function quickSearch(){
+	
+	tInput = qsfield;
+
+	if (tInput.value.length == 0) {
+		showAll();
+		setStatistics(-1);
+		qsfield.className = '';
+		return;
+	} else {
+		t = stripDiacritics(tInput.value);
+
+		if(!searchRegExp) { t = escapeRegExp(t); }
+			
+		// only search for valid RegExp
+		try {
+			textRegExp = new RegExp(t,"i");
+			closeAllInfo();
+			qsfield.className = '';
+		}
+			catch(err) {
+			prevSearch = tInput.value;
+			qsfield.className = 'invalidsearch';
+			return;
+		}
+	}
+	
+	// count number of hits
+	var hits = 0;
+
+	// start looping through all entry rows
+	for (var i = 0; cRow = entryRows[i]; i++){
+
+		// only show search the cells if it isn't already hidden OR if the search term is getting shorter, then search all
+		if(cRow.className.indexOf('noshow')==-1 || tInput.value.length <= prevSearch.length){
+			var found = false; 
+
+			if (entryRowsData[i].search(textRegExp) != -1 || BibTeXKeys[i].search(textRegExp) != -1){ 
+				found = true;
+			} else {
+				if(searchAbstract && absRowsData[i]!=undefined) {
+					if (absRowsData[i].search(textRegExp) != -1){ found=true; } 
+				}
+				if(searchReview && revRowsData[i]!=undefined) {
+					if (revRowsData[i].search(textRegExp) != -1){ found=true; } 
+				}
+			}
+			
+			if (found){
+				cRow.className = 'entry show';
+				hits++;
+			} else {
+				cRow.className = 'entry noshow';
+			}
+		}
+	}
+
+	// update statistics
+	setStatistics(hits)
+	
+	// set previous search value
+	prevSearch = tInput.value;
+}
+
+
+// Strip Diacritics from text
+// http://stackoverflow.com/questions/990904/javascript-remove-accents-in-strings
+
+// String containing replacement characters for stripping accents 
+var stripstring = 
+    'AAAAAAACEEEEIIII'+
+    'DNOOOOO.OUUUUY..'+
+    'aaaaaaaceeeeiiii'+
+    'dnooooo.ouuuuy.y'+
+    'AaAaAaCcCcCcCcDd'+
+    'DdEeEeEeEeEeGgGg'+
+    'GgGgHhHhIiIiIiIi'+
+    'IiIiJjKkkLlLlLlL'+
+    'lJlNnNnNnnNnOoOo'+
+    'OoOoRrRrRrSsSsSs'+
+    'SsTtTtTtUuUuUuUu'+
+    'UuUuWwYyYZzZzZz.';
+
+function stripDiacritics(str){
+
+    if(noSquiggles==false){
+        return str;
+    }
+
+    var answer='';
+    for(var i=0;i<str.length;i++){
+        var ch=str[i];
+        var chindex=ch.charCodeAt(0)-192;   // Index of character code in the strip string
+        if(chindex>=0 && chindex<stripstring.length){
+            // Character is within our table, so we can strip the accent...
+            var outch=stripstring.charAt(chindex);
+            // ...unless it was shown as a '.'
+            if(outch!='.')ch=outch;
+        }
+        answer+=ch;
+    }
+    return answer;
+}
+
+// http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+// NOTE: must escape every \ in the export code because of the JabRef Export...
+function escapeRegExp(str) {
+  return str.replace(/[-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
+
+function toggleInfo(articleid,info) {
+
+	var entry = document.getElementById(articleid);
+	var abs = document.getElementById('abs_'+articleid);
+	var rev = document.getElementById('rev_'+articleid);
+	var bib = document.getElementById('bib_'+articleid);
+	
+	if (abs && info == 'abstract') {
+		abs.className.indexOf('noshow') == -1?abs.className = 'abstract noshow':abs.className = 'abstract show';
+	} else if (rev && info == 'review') {
+		rev.className.indexOf('noshow') == -1?rev.className = 'review noshow':rev.className = 'review show';
+	} else if (bib && info == 'bibtex') {
+		bib.className.indexOf('noshow') == -1?bib.className = 'bibtex noshow':bib.className = 'bibtex show';
+	} else { 
+		return;
+	}
+
+	// check if one or the other is available
+	var revshow; var absshow; var bibshow;
+	(abs && abs.className.indexOf('noshow') == -1)? absshow = true: absshow = false;
+	(rev && rev.className.indexOf('noshow') == -1)? revshow = true: revshow = false;	
+	(bib && bib.className.indexOf('noshow') == -1)? bibshow = true: bibshow = false;
+	
+	// highlight original entry
+	if(entry) {
+		if (revshow || absshow || bibshow) {
+		entry.className = 'entry highlight show';
+		} else {
+		entry.className = 'entry show';
+		}
+	}
+	
+	// When there's a combination of abstract/review/bibtex showing, need to add class for correct styling
+	if(absshow) {
+		(revshow||bibshow)?abs.className = 'abstract nextshow':abs.className = 'abstract';
+	} 
+	if (revshow) {
+		bibshow?rev.className = 'review nextshow': rev.className = 'review';
+	}	
+	
+}
+
+function setStatistics (hits) {
+	if(hits < 0) { hits=numEntries; }
+	if(stats) { stats.firstChild.data = hits + '/' + numEntries}
+}
+
+function getTextContent(node) {
+	// Function written by Arve Bersvendsen
+	// http://www.virtuelvis.com
+	
+	if (node.nodeType == 3) {
+	return node.nodeValue;
+	} // text node
+	if (node.nodeType == 1 && node.className != "infolinks") { // element node
+	var text = [];
+	for (var chld = node.firstChild;chld;chld=chld.nextSibling) {
+		text.push(getTextContent(chld));
+	}
+	return text.join("");
+	} return ""; // some other node, won't contain text nodes.
+}
+
+function showAll(){
+	closeAllInfo();
+	for (var i = 0; i < numEntries; i++){ entryRows[i].className = 'entry show'; }
+}
+
+function closeAllInfo(){
+	for (var i=0; i < numInfo; i++){
+		if (infoRows[i].className.indexOf('noshow') ==-1) {
+			infoRows[i].className = infoRows[i].className + ' noshow';
+		}
+	}
+}
+
+function clearQS() {
+	qsfield.value = '';
+	showAll();
+}
+
+function redoQS(){
+	showAll();
+	quickSearch(qsfield);
+}
+
+function updateSetting(obj){
+	var option = obj.id;
+	var checked = obj.value;
+
+	switch(option)
+	 {
+	 case "opt_searchAbs":
+	   searchAbstract=!searchAbstract;
+	   redoQS();
+	   break;
+	 case "opt_searchRev":
+	   searchReview=!searchReview;
+	   redoQS();
+	   break;
+	 case "opt_useRegExp":
+	   searchRegExp=!searchRegExp;
+	   redoQS();
+	   break;
+	 case "opt_noAccents":
+	   noSquiggles=!noSquiggles;
+	   loadTableData();
+	   redoQS();
+	   break;
+	 }
+}
+
+function initPreferences(){
+	if(searchAbstract){document.getElementById("opt_searchAbs").checked = true;}
+	if(searchReview){document.getElementById("opt_searchRev").checked = true;}
+	if(noSquiggles){document.getElementById("opt_noAccents").checked = true;}
+	if(searchRegExp){document.getElementById("opt_useRegExp").checked = true;}
+	
+	if(numAbs==0) {document.getElementById("opt_searchAbs").parentNode.style.display = 'none';}
+	if(numRev==0) {document.getElementById("opt_searchRev").parentNode.style.display = 'none';}	
+}
+
+function toggleSettings(){
+	var togglebutton = document.getElementById('showsettings');
+	var settings = document.getElementById('settings');
+	
+	if(settings.className == "hidden"){
+		settings.className = "show";
+		togglebutton.innerText = "close settings";
+		togglebutton.textContent = "close settings";
+	}else{
+		settings.className = "hidden";
+		togglebutton.innerText = "settings...";		
+		togglebutton.textContent = "settings...";
+	}
+}
+
+-->
+</script>
+<style type="text/css">
+body { background-color: white; font-family: Arial, sans-serif; font-size: 13px; line-height: 1.2; padding: 1em; color: #2E2E2E; width: 50em; margin: auto auto; }
+
+form#quicksearch { width: auto; border-style: solid; border-color: gray; border-width: 1px 0px; padding: 0.7em 0.5em; display:none; position:relative; }
+span#searchstat {padding-left: 1em;}
+
+div#settings { margin-top:0.7em; /* border-bottom: 1px transparent solid; background-color: #efefef; border: 1px grey solid; */ }
+div#settings ul {margin: 0; padding: 0; }
+div#settings li {margin: 0; padding: 0 1em 0 0; display: inline; list-style: none; }
+div#settings li + li { border-left: 2px #efefef solid; padding-left: 0.5em;}
+div#settings input { margin-bottom: 0px;}
+
+div#settings.hidden {display:none;}
+
+#showsettings { border: 1px grey solid; padding: 0 0.5em; float:right; line-height: 1.6em; text-align: right; }
+#showsettings:hover { cursor: pointer; }
+
+.invalidsearch { background-color: red; }
+input[type="button"] { background-color: #efefef; border: 1px #2E2E2E solid;}
+
+table { border: 1px gray none; width: 100%; empty-cells: show; border-spacing: 0em 0.1em; margin: 1em 0em; }
+th, td { border: none; padding: 0.5em; vertical-align: top; text-align: justify; }
+
+td a { color: navy; text-decoration: none; }
+td a:hover  { text-decoration: underline; }
+
+tr.noshow { display: none;}
+tr.highlight td { background-color: #EFEFEF; border-top: 2px #2E2E2E solid; font-weight: bold; }
+tr.abstract td, tr.review td, tr.bibtex td { background-color: #EFEFEF; text-align: justify; border-bottom: 2px #2E2E2E solid; }
+tr.nextshow td { border-bottom-style: none; }
+
+tr.bibtex pre { width: 100%; overflow: auto; white-space: pre-wrap;}
+p.infolinks { margin: 0.3em 0em 0em 0em; padding: 0px; }
+
+@media print {
+	p.infolinks, #qs_settings, #quicksearch, t.bibtex { display: none !important; }
+	tr { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<form action="" id="quicksearch">
+<input type="text" id="qs_field" autocomplete="off" placeholder="Type to search..." /> <input type="button" onclick="clearQS()" value="clear" />
+<span id="searchstat">Matching entries: <span id="stat">0</span></span>
+<div id="showsettings" onclick="toggleSettings()">settings...</div>
+<div id="settings" class="hidden">
+<ul>
+<li><input type="checkbox" class="search_setting" id="opt_searchAbs" onchange="updateSetting(this)"><label for="opt_searchAbs"> include abstract</label></li>
+<li><input type="checkbox" class="search_setting" id="opt_searchRev" onchange="updateSetting(this)"><label for="opt_searchRev"> include review</label></li>
+<li><input type="checkbox" class="search_setting" id="opt_useRegExp" onchange="updateSetting(this)"><label for="opt_useRegExp"> use RegExp</label></li>
+<li><input type="checkbox" class="search_setting" id="opt_noAccents" onchange="updateSetting(this)"><label for="opt_noAccents"> ignore accents</label></li>
+</ul>
+</div>
+</form>
+<table id="qs_table" border="1">
+<tbody>
+<tr id="Meldo-Utkin-Ryabinin-2019" class="entry">
+	<td>Уткин Л, Рябинин М and Мелдо А (2019), <i>"Комбинированная автоматизированная система сегментации и обнаружения новообразований для диагностики рака легкого"</i>, Робототехника и техническая кибернетика.  Vol. 7(2), pp. 145-153.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Meldo-Utkin-Ryabinin-2019','bibtex')">BibTeX</a>] [<a href="https://doi.org/10.31776/RTCJ.7209" target="_blank">DOI</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Meldo-Utkin-Ryabinin-2019" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Meldo-Utkin-Ryabinin-2019,
+  author = {Л.В. Уткин and М.А. Рябинин and А.А. Мелдо},
+  title = {Комбинированная автоматизированная система сегментации и обнаружения новообразований для диагностики рака легкого},
+  journal = {Робототехника и техническая кибернетика},
+  year = {2019},
+  volume = {7},
+  number = {2},
+  pages = {145--153},
+  doi = {10.31776/RTCJ.7209}
+}
+</pre></td>
+</tr>
+<tr id="Ipatov-Utkin-2018" class="entry">
+	<td>Ипатов О and Уткин Л (2018), <i>"Системы искусственного интеллекта для диагностики онкологических заболеваний"</i>, In Материалы IV Межрегиональной научно-практической конференция "Перспективные направления развития отечественных информационных технологий". Севастополь , pp. 39-40. СевГУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Ipatov-Utkin-2018','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Ipatov-Utkin-2018" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Ipatov-Utkin-2018,
+  author = {О.С. Ипатов and Л.В. Уткин},
+  title = {Системы искусственного интеллекта для диагностики онкологических заболеваний},
+  booktitle = {Материалы IV Межрегиональной научно-практической конференция "Перспективные направления развития отечественных информационных технологий"},
+  publisher = {СевГУ},
+  year = {2018},
+  pages = {39-40}
+}
+</pre></td>
+</tr>
+<tr id="Meldo-Utkin-2018" class="entry">
+	<td>Мелдо А and Уткин Л (2018), <i>"Обзор методов машинного обучения в диагностике рака легкого"</i>, Искусственный интеллект и принятие решений. (3), pp. 28-38.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Meldo-Utkin-2018','bibtex')">BibTeX</a>] [<a href="https://doi.org/10.14357/20718594180313" target="_blank">DOI</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Meldo-Utkin-2018" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Meldo-Utkin-2018,
+  author = {А.А. Мелдо and Л.В. Уткин},
+  title = {Обзор методов машинного обучения в диагностике рака легкого},
+  journal = {Искусственный интеллект и принятие решений},
+  year = {2018},
+  number = {3},
+  pages = {28-38},
+  doi = {10.14357/20718594180313}
+}
+</pre></td>
+</tr>
+<tr id="Meldo-Utkin-Moiseenko-2018" class="entry">
+	<td>Мелдо АА, Уткин ЛВ and Моисеенко ВМ (2018), <i>"Алгоритмы диагностики XXl века. Искусственный интеллект в распознавании рака лёгкого"</i>, Практическая онкология.  Vol. 19(3), pp. 292-298.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Meldo-Utkin-Moiseenko-2018','bibtex')">BibTeX</a>] [<a href="https://doi.org/10.31917/1903292" target="_blank">DOI</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Meldo-Utkin-Moiseenko-2018" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Meldo-Utkin-Moiseenko-2018,
+  author = {Мелдо А.А., Уткин Л.В., Моисеенко В.М.},
+  title = {Алгоритмы диагностики XXl века. Искусственный интеллект в распознавании рака лёгкого},
+  journal = {Практическая онкология},
+  year = {2018},
+  volume = {19},
+  number = {3},
+  pages = {292-298},
+  doi = {10.31917/1903292}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ipatov-Meldo-2018" class="entry">
+	<td>Уткин Л, Ипатов О and Мелдо А (2018), <i>"Медицинские системы искусственного интеллекта на примере диагностики рака легкого"</i>, In Материалы 5-й Всероссийской научно-технической конференции "Суперкомпьютерные технологии (СКТ-2018)". Сборник докладов в 2-х томах. Дивноморское, Геленджик  Vol. 2, pp. 127-131. Издательство Южного федерального университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ipatov-Meldo-2018','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ipatov-Meldo-2018" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Ipatov-Meldo-2018,
+  author = {Л.В. Уткин and О.С. Ипатов and А.А. Мелдо},
+  title = {Медицинские системы искусственного интеллекта на примере диагностики рака легкого},
+  booktitle = {Материалы 5-й Всероссийской научно-технической конференции "Суперкомпьютерные технологии (СКТ-2018)". Сборник докладов в 2-х томах},
+  publisher = {Издательство Южного федерального университета},
+  year = {2018},
+  volume = {2},
+  pages = {127-131}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Meldo-Ryabinin-2018" class="entry">
+	<td>Уткин Л, Рябинин М and Мелдо А (2018), <i>"Интеллектуальная система выбора лечения на основе каскада случайных лесов в рамках анализа выживаемости"</i>, In Труды Международной научной конференции «IEEE Northwest Russia Conference On Mathematical Methods In Engineering And Technology: ММEТ NW 2018». СПб  Vol. 1, pp. 534-537. СПбГЭТУ «ЛЭТИ».
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Meldo-Ryabinin-2018','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Meldo-Ryabinin-2018" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Meldo-Ryabinin-2018,
+  author = {Л.В. Уткин and М.А. Рябинин and А.А. Мелдо},
+  title = {Интеллектуальная система выбора лечения на основе каскада случайных лесов в рамках анализа выживаемости},
+  booktitle = {Труды Международной научной конференции «IEEE Northwest Russia Conference On Mathematical Methods In Engineering And Technology: ММEТ NW 2018»},
+  publisher = {СПбГЭТУ «ЛЭТИ»},
+  year = {2018},
+  volume = {1},
+  pages = {534-537}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-R-Meldo-2018" class="entry">
+	<td>Уткин Л, Рябинин М and Мелдо А (2018), <i>"Случайные леса и метод хорд для интеллектуальной диагностики рака легких"</i>, In XXI Международная конференция по мягким вычислениям и измерениям (SCM-2018). Сборник докладов в 2-х томах. Санкт-Петербург  Vol. 2, pp. 11-14. СПбГЭТУ "ЛЭТИ".
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-R-Meldo-2018','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-R-Meldo-2018" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-R-Meldo-2018,
+  author = {Л.В. Уткин and М.А. Рябинин and А.А. Мелдо},
+  title = {Случайные леса и метод хорд для интеллектуальной диагностики рака легких},
+  booktitle = {XXI Международная конференция по мягким вычислениям и измерениям (SCM-2018). Сборник докладов в 2-х томах},
+  publisher = {СПбГЭТУ "ЛЭТИ"},
+  year = {2018},
+  volume = {2},
+  pages = {11-14}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-RZZ-2018" class="entry">
+	<td>Уткин Л, Рябинин М, Жук К and Жук Ю (2018), <i>"Классификация на основе композиции случайных лесов и параллельных нейронных сетей"</i>, In XXI Международная конференция по мягким вычислениям и измерениям (SCM-2018). Сборник докладов в 2-х томах. Санкт-Петербург  Vol. 1, pp. 662-665. СПбГЭТУ "ЛЭТИ".
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-RZZ-2018','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-RZZ-2018" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-RZZ-2018,
+  author = {Л.В. Уткин and М.А. Рябинин and К.Д. Жук and Ю.А. Жук},
+  title = {Классификация на основе композиции случайных лесов и параллельных нейронных сетей},
+  booktitle = {XXI Международная конференция по мягким вычислениям и измерениям (SCM-2018). Сборник докладов в 2-х томах},
+  publisher = {СПбГЭТУ "ЛЭТИ"},
+  year = {2018},
+  volume = {1},
+  pages = {662-665}
+}
+</pre></td>
+</tr>
+<tr id="Gurov-Utkin-2017a" class="entry">
+	<td>Гуров С and Уткин Л (2017), <i>"Надежность восстанавливаемых резервированных систем с последействием отказов"</i>, Автоматика и телемеханика. , pp. 137-151.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Gurov-Utkin-2017a','bibtex')">BibTeX</a>] [<a href="https://doi.org/10.1134/S000511791701009X" target="_blank">DOI</a>] [<a href="http://mi.mathnet.ru/at14417" target="_blank">URL</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Gurov-Utkin-2017a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Gurov-Utkin-2017a,
+  author = {С.В. Гуров and Л.В. Уткин},
+  title = {Надежность восстанавливаемых резервированных систем с последействием отказов},
+  journal = {Автоматика и телемеханика},
+  year = {2017},
+  pages = {137--151},
+  url = {http://mi.mathnet.ru/at14417},
+  doi = {10.1134/S000511791701009X}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ipatov-2017" class="entry">
+	<td>Уткин Л.В. ИО (2017), <i>"Обнаружение аномального поведения данных системой медицинского мониторинга на основе сиамского автокодера"</i>, In Математические методы в технике и технологиях. Сборник трудов международной научной конференции. СПб , pp. 94-97.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ipatov-2017','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ipatov-2017" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Ipatov-2017,
+  author = {Уткин Л.В., Ипатов О.С.},
+  editor = {Издательство Политехнического университета},
+  title = {Обнаружение аномального поведения данных системой медицинского мониторинга на основе сиамского автокодера},
+  booktitle = {Математические методы в технике и технологиях. Сборник трудов международной научной конференции},
+  year = {2017},
+  pages = {94-97}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ryabinin-2017d" class="entry">
+	<td>Уткин Л and Рябинин М (2017), <i>"Новый алгоритм классификации на основе глубоких лесов"</i>, In Нечеткие системы, мягкие вычисления и интеллектуальные технологии: Труды VII всероссийской научной-практической конференции. Санкт-Петербург  Vol. 1, pp. 173-179.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ryabinin-2017d','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ryabinin-2017d" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Ryabinin-2017d,
+  author = {Л.В. Уткин and М.А. Рябинин},
+  title = {Новый алгоритм классификации на основе глубоких лесов},
+  booktitle = {Нечеткие системы, мягкие вычисления и интеллектуальные технологии: Труды VII всероссийской научной-практической конференции},
+  year = {2017},
+  volume = {1},
+  pages = {173--179}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ryabinin-2017e" class="entry">
+	<td>Л.В. Уткин МР (2017), <i>"Сиамский глубокий лес для анализа аномального поведения элементов человеко-машинных систем"</i>, In Материалы 10-й Всероссийской мультиконференции по проблемам управления (МКПУ-2017). , pp. 159-161.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ryabinin-2017e','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ryabinin-2017e" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Ryabinin-2017e,
+  author = {Л.В. Уткин, М.А. Рябинин},
+  title = {Сиамский глубокий лес для анализа аномального поведения элементов человеко-машинных систем},
+  booktitle = {Материалы 10-й Всероссийской мультиконференции по проблемам управления (МКПУ-2017)},
+  year = {2017},
+  pages = {159-161}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ryabinin-2017k" class="entry">
+	<td>Уткин Л.В. РМ (2017), <i>"Сиамский глубокий лес как альтернатива сиамским глубоким нейронным сетям"</i>, In Математические методы в технике и технологиях. Сборник трудов международной научной конференции. СПб, май-июнь, 2017. , pp. 89-93.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ryabinin-2017k','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ryabinin-2017k" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Ryabinin-2017k,
+  author = {Уткин Л.В., Рябинин М.А.},
+  editor = {Издательство Политехнического университета},
+  title = {Сиамский глубокий лес как альтернатива сиамским глубоким нейронным сетям},
+  booktitle = {Математические методы в технике и технологиях. Сборник трудов международной научной конференции},
+  year = {2017},
+  pages = {89-93}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-2017d" class="entry">
+	<td>Уткин Л and Жук Ю (2017), <i>"Алгоритм классификации интервальных данных с использованием нейронных сетей"</i>, In Нечеткие системы, мягкие вычисления и интеллектуальные технологии: Труды VII всероссийской научной-практической конференции. Санкт-Петербург  Vol. 2, pp. 166-172.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-2017d','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-2017d" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-2017d,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Алгоритм классификации интервальных данных с использованием нейронных сетей},
+  booktitle = {Нечеткие системы, мягкие вычисления и интеллектуальные технологии: Труды VII всероссийской научной-практической конференции},
+  year = {2017},
+  volume = {2},
+  pages = {166-172}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-2016a" class="entry">
+	<td>Уткин ЛВ (2016), <i>"Малые и неточные данные: проблемы машинного обучения системы роботов и пути их решения"</i>, Математические методы в технике и технологиях - ММТТ., In Математические методы в технике и технологиях - ММТТ.  Vol. 11(93), pp. 72-77.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-2016a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-2016a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-2016a,
+  author = {Уткин Л.В.},
+  title = {Малые и неточные данные: проблемы машинного обучения системы роботов и пути их решения},
+  booktitle = {Математические методы в технике и технологиях - ММТТ},
+  journal = {Математические методы в технике и технологиях - ММТТ},
+  year = {2016},
+  volume = {11},
+  number = {93},
+  pages = {72-77}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zaborovsky-Popov-2016" class="entry">
+	<td>Уткин Л, Заборовский В and Попов С (2016), <i>"Контроль информационной безопасности в системе роботов на основе элементов глубокого обучения"</i>, Проблемы информационной безопасности. Компьютерные системы. , pp. 25-33.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zaborovsky-Popov-2016','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zaborovsky-Popov-2016" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zaborovsky-Popov-2016,
+  author = {Л.В. Уткин and В.С. Заборовский and С.Г. Попов},
+  title = {Контроль информационной безопасности в системе роботов на основе элементов глубокого обучения},
+  journal = {Проблемы информационной безопасности. Компьютерные системы},
+  year = {2016},
+  pages = {25-33}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zaborovsky-Popov-2016a" class="entry">
+	<td>Уткин Л, Заборовский В and Попов С (2016), <i>"Сиамская нейронная сеть для интеллектуального контроля информационной безопасности в системе роботов"</i>, Проблемы информационной безопасности. Компьютерные системы. , pp. 80-88.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zaborovsky-Popov-2016a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zaborovsky-Popov-2016a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zaborovsky-Popov-2016a,
+  author = {Л.В. Уткин and В.С. Заборовский and С.Г. Попов},
+  title = {Сиамская нейронная сеть для интеллектуального контроля информационной безопасности в системе роботов},
+  journal = {Проблемы информационной безопасности. Компьютерные системы},
+  year = {2016},
+  pages = {80-88}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-2016c" class="entry">
+	<td>Уткин Л and Жук Ю (2016), <i>"Полногеномный поиск ассоциаций с использованием матриц парных сравнений"</i>, Труды СПИИРАН.  Vol. 47, pp. 225-240.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-2016c','bibtex')">BibTeX</a>] [<a href="https://doi.org/10.15622/sp.47.12" target="_blank">DOI</a>] [<a href="http://www.proceedings.spiiras.nw.ru/ojs/index.php/sp/article/view/3305/1943" target="_blank">URL</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-2016c" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zhuk-2016c,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Полногеномный поиск ассоциаций с использованием матриц парных сравнений},
+  journal = {Труды СПИИРАН},
+  year = {2016},
+  volume = {47},
+  pages = {225-240},
+  url = {http://www.proceedings.spiiras.nw.ru/ojs/index.php/sp/article/view/3305/1943},
+  doi = {10.15622/sp.47.12}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-2016d" class="entry">
+	<td>Уткин Л and Жук Ю (2016), <i>"Робастная модификация метода k-средних для кластеризации интервальных данных"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 216, pp. 255-266.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-2016d','bibtex')">BibTeX</a>] [<a href="https://doi.org/10.21266/2079-4304.2016.216.255-266" target="_blank">DOI</a>] [<a href="http://spbftu.ru/izvestia/archive/index.php?lang=rus" target="_blank">URL</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-2016d" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zhuk-2016d,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Робастная модификация метода k-средних для кластеризации интервальных данных},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2016},
+  volume = {216},
+  pages = {255-266},
+  url = {http://spbftu.ru/izvestia/archive/index.php?lang=rus},
+  doi = {10.21266/2079-4304.2016.216.255-266}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-2016u" class="entry">
+	<td>Уткин Л.В. ЖЮ (2016), <i>"Элементы системного анализа: теория игр (учебное пособие)"</i> СПб , pp. 84. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-2016u','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-2016u" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Zhuk-2016u,
+  author = {Уткин Л.В., Жук Ю.А.},
+  title = {Элементы системного анализа: теория игр (учебное пособие)},
+  publisher = {Издательство Политехнического университета},
+  year = {2016},
+  pages = {84}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Coolen" class="entry">
+	<td>Уткин Л, Жук Ю and Коолен Ф (2016), <i>"Робастная модификация метода Лассо для полногеномного поиска ассоциаций с учетом целевых значений фенотипа"</i>, Научно-технический вестник информационных технологий, механики и оптики.  Vol. 16(1), pp. 150-160.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Coolen','bibtex')">BibTeX</a>] [<a href="https://doi.org/10.17586/2226-1494-2016-16-1-150-160" target="_blank">DOI</a>] [<a href="http://ntv.ifmo.ru/ru/article/14559/robastnaya_modifikaciya_metoda_lasso_dlya_polnogenomnogo_poiska_associaciy_s_uchetom_celevyh_znacheniy_fenotipa.htm" target="_blank">URL</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Coolen" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zhuk-Coolen,
+  author = {Л.В. Уткин and Ю.А. Жук and Ф. Коолен},
+  title = {Робастная модификация метода Лассо для полногеномного поиска ассоциаций с учетом целевых значений фенотипа},
+  journal = {Научно-технический вестник информационных технологий, механики и оптики},
+  year = {2016},
+  volume = {16},
+  number = {1},
+  pages = {150-160},
+  url = {http://ntv.ifmo.ru/ru/article/14559/robastnaya_modifikaciya_metoda_lasso_dlya_polnogenomnogo_poiska_associaciy_s_uchetom_celevyh_znacheniy_fenotipa.htm},
+  doi = {10.17586/2226-1494-2016-16-1-150-160}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Popov-2016" class="entry">
+	<td>Уткин Л, Жук Ю and Попов С (2016), <i>"Робастная передача обучения в системах роботов с использованием разреженного автокодера"</i>, In Труды 19-ой Международной конференции по мягким вычислениям и измерениям (SCM'2016). СПб  Vol. 1, pp. 172-175. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Popov-2016','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Popov-2016" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-Popov-2016,
+  author = {Л.В. Уткин and Ю.А. Жук and С.Г. Попов},
+  title = {Робастная передача обучения в системах роботов с использованием разреженного автокодера},
+  booktitle = {Труды 19-ой Международной конференции по мягким вычислениям и измерениям (SCM'2016)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2016},
+  volume = {1},
+  pages = {172-175}
+}
+</pre></td>
+</tr>
+<tr id="Botjan-Utkin-2015" class="entry">
+	<td>Ботян И and Уткин ЛВ (2015), <i>"Особенности программной реализации машины опорных векторов при интервальных предпочтениях в обучающей выборке"</i>, In Труды 18-ой Международной конференции по мягким вычислениям и измерениям (SCM'2015). Санкт-Петербург, май, 2015.  Vol. 1, pp. 19-22. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Botjan-Utkin-2015','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Botjan-Utkin-2015" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Botjan-Utkin-2015,
+  author = {И.Ю. Ботян and Л. В. Уткин},
+  title = {Особенности программной реализации машины опорных векторов при интервальных предпочтениях в обучающей выборке},
+  booktitle = {Труды 18-ой Международной конференции по мягким вычислениям и измерениям (SCM'2015)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2015},
+  volume = {1},
+  pages = {19-22}
+}
+</pre></td>
+</tr>
+<tr id="Egorov-Zhuk-Utkin-2015" class="entry">
+	<td>Егоров А, Уткин Л and Жук Ю (2015), <i>"Оценка влияния факторов на устойчивость деревьев в рамках анализа экологического риска с использованием статистической модели засорения"</i>, In Труды Международной Научной Школы МА БР -- 2015. Санкт-Петербург , pp. 134-139. СПбГУАП.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Egorov-Zhuk-Utkin-2015','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Egorov-Zhuk-Utkin-2015" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Egorov-Zhuk-Utkin-2015,
+  author = {А.А. Егоров and Л.В. Уткин and Ю.А. Жук},
+  title = {Оценка влияния факторов на устойчивость деревьев в рамках анализа экологического риска с использованием статистической модели засорения},
+  booktitle = {Труды Международной Научной Школы МА БР -- 2015},
+  publisher = {СПбГУАП},
+  year = {2015},
+  pages = {134-139}
+}
+</pre></td>
+</tr>
+<tr id="Gurov-Utkin-2015f" class="entry">
+	<td>Гуров С and Уткин Л (2015), <i>"Модели и характеристики надежности ремонтируемого объекта в условиях воздействия внешней нагрузки"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 210, pp. 226-242.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Gurov-Utkin-2015f','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Gurov-Utkin-2015f" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Gurov-Utkin-2015f,
+  author = {С.В. Гуров and Л.В. Уткин},
+  title = {Модели и характеристики надежности ремонтируемого объекта в условиях воздействия внешней нагрузки},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2015},
+  volume = {210},
+  pages = {226-242}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-2015h" class="entry">
+	<td>Уткин Л (2015), <i>"Робастные модели надежности программного обеспечения на основе метода опорных векторов с учетом старения данных"</i>, In Материалы конференции "Всероссийская научная конференция по проблемам управления в технических системах (ПУТС-2015)". Санкт-Петербург , pp. 207-210. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-2015h','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-2015h" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-2015h,
+  author = {Л.В. Уткин},
+  title = {Робастные модели надежности программного обеспечения на основе метода опорных векторов с учетом старения данных},
+  booktitle = {Материалы конференции "Всероссийская научная конференция по проблемам управления в технических системах (ПУТС-2015)"},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2015},
+  pages = {207-210}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkina-2015" class="entry">
+	<td>Уткин Л and Уткина И (2015), <i>"Быстрый алгоритм полногеномного поиска ассоциаций по схеме случай--контроль"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 213, pp. 263-273.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkina-2015','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkina-2015" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Utkina-2015,
+  author = {Л.В. Уткин and И.Л. Уткина},
+  title = {Быстрый алгоритм полногеномного поиска ассоциаций по схеме случай--контроль},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2015},
+  volume = {213},
+  pages = {263-273}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-2015g" class="entry">
+	<td>Уткин Л and Жук Ю (2015), <i>"Робастная непараметрическая модель роста надежности программного обеспечения при старении данных об отказах с использованием границ Колмогорова-Смирнова"</i>, In Труды Международной Научной Школы МА БР -- 2015. Санкт-Петербург , pp. 90-95. СПбГУАП.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-2015g','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-2015g" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-2015g,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Робастная непараметрическая модель роста надежности программного обеспечения при старении данных об отказах с использованием границ Колмогорова-Смирнова},
+  booktitle = {Труды Международной Научной Школы МА БР -- 2015},
+  publisher = {СПбГУАП},
+  year = {2015},
+  pages = {90-95}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Gurov-2015" class="entry">
+	<td>Уткин Л, Жук Ю and Гуров С (2015), <i>"Определение значимых ДНК-маркеров на основе модификации метода лассо для популяций удвоенных гаплоидных линий ячменя"</i>, In Труды 18-ой Международной конференции по мягким вычислениям и измерениям (SCM'2015). Санкт-Петербург, май, 2015.  Vol. 1, pp. 13-16. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Gurov-2015','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Gurov-2015" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-Gurov-2015,
+  author = {Л.В. Уткин and Ю.А. Жук and С.В. Гуров},
+  title = {Определение значимых ДНК-маркеров на основе модификации метода лассо для популяций удвоенных гаплоидных линий ячменя},
+  booktitle = {Труды 18-ой Международной конференции по мягким вычислениям и измерениям (SCM'2015)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2015},
+  volume = {1},
+  pages = {13-16}
+}
+</pre></td>
+</tr>
+<tr id="Zhuk-Utkin-2015" class="entry">
+	<td>Жук Ю and Уткин Л (2015), <i>"Робастная модель классификации с учетом значимости классов"</i>, In Труды 18-ой Международной конференции по мягким вычислениям и измерениям (SCM'2015). Санкт-Петербург, май, 2015.  Vol. 1, pp. 9-13. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zhuk-Utkin-2015','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zhuk-Utkin-2015" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Zhuk-Utkin-2015,
+  author = {Ю.А. Жук and Л.В. Уткин},
+  title = {Робастная модель классификации с учетом значимости классов},
+  booktitle = {Труды 18-ой Международной конференции по мягким вычислениям и измерениям (SCM'2015)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2015},
+  volume = {1},
+  pages = {9-13}
+}
+</pre></td>
+</tr>
+<tr id="Botjan-Utkin-2014" class="entry">
+	<td>Ботян И and Уткин Л (2014), <i>"Общий подход к классификации и ранжированию документов при неточных сравнительных оценках"</i>, In Труды 17-ой Международной конференции по мягким вычислениям и измерениям (SCM'2014). Санкт-Петербург, май, 2014.  Vol. 1, pp. 34-37. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Botjan-Utkin-2014','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Botjan-Utkin-2014" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Botjan-Utkin-2014,
+  author = {И.Ю. Ботян and Л.В. Уткин},
+  title = {Общий подход к классификации и ранжированию документов при неточных сравнительных оценках},
+  booktitle = {Труды 17-ой Международной конференции по мягким вычислениям и измерениям (SCM'2014)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2014},
+  volume = {1},
+  pages = {34-37}
+}
+</pre></td>
+</tr>
+<tr id="Botjan-Utkin-2014a" class="entry">
+	<td>Ботян И and Уткин Л (2014), <i>"Робастная модель классификации и ранжирования документов при интервальных предпочтениях в обучающей выборке"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 208, pp. 196-210.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Botjan-Utkin-2014a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Botjan-Utkin-2014a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Botjan-Utkin-2014a,
+  author = {И.Ю. Ботян and Л.В. Уткин},
+  title = {Робастная модель классификации и ранжирования документов при интервальных предпочтениях в обучающей выборке},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2014},
+  volume = {208},
+  pages = {196-210}
+}
+</pre></td>
+</tr>
+<tr id="Botjan-Utkin-2014b" class="entry">
+	<td>Ботян И.Ю. УЛ (2014), <i>"Минимаксная классификация интервальных оценок предпочтений с использованием машины опорных векторов"</i>, In Нечеткие системы и мягкие вычисления (НСМВ-2014): Труды VI-й Всероссийской научно-практической конференции. СПб.  Vol. 1, pp. 184-191. Политехника-сервис.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Botjan-Utkin-2014b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Botjan-Utkin-2014b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Botjan-Utkin-2014b,
+  author = {Ботян И.Ю., Уткин Л.В},
+  title = {Минимаксная классификация интервальных оценок предпочтений с использованием машины опорных векторов},
+  booktitle = {Нечеткие системы и мягкие вычисления (НСМВ-2014): Труды VI-й Всероссийской научно-практической конференции},
+  publisher = {Политехника-сервис},
+  year = {2014},
+  volume = {1},
+  pages = {184-191}
+}
+</pre></td>
+</tr>
+<tr id="Chech-Utkin-2014" class="entry">
+	<td>Чех А and Уткин Л (2014), <i>"Алгоритм определения значимых признаков на основе их разделения на независимые группы с использованием представления Бахадура"</i>, In Труды 17-ой Международной конференции по мягким вычислениям и измерениям (SCM'2014). Санкт-Петербург, май, 2014.  Vol. 1, pp. 171-174. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Chech-Utkin-2014','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Chech-Utkin-2014" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Chech-Utkin-2014,
+  author = {А.И. Чех and Л.В. Уткин},
+  title = {Алгоритм определения значимых признаков на основе их разделения на независимые группы с использованием представления Бахадура},
+  booktitle = {Труды 17-ой Международной конференции по мягким вычислениям и измерениям (SCM'2014)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2014},
+  volume = {1},
+  pages = {171-174}
+}
+</pre></td>
+</tr>
+<tr id="Prokopchina-2014" class="entry">
+	<td>Прокопчина С, Шестопалов М, Уткин Л, Куприянов М, Лазарев В, Имаев Д, Горохов В, Жук Ю and Спесивцев А (2014), <i>"Управление в условиях неопределенности"</i> СПб  СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Prokopchina-2014','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Prokopchina-2014" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Prokopchina-2014,
+  author = {С.В. Прокопчина and М.Ю. Шестопалов and Л.В. Уткин and М.С. Куприянов and В.Л. Лазарев and Д.Х. Имаев and В.Л. Горохов and Ю.А. Жук and А.В. Спесивцев},
+  title = {Управление в условиях неопределенности},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2014},
+  note = {304 с.}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-2014r" class="entry">
+	<td>Уткин Л (2014), <i>"Новый композиционный алгоритм классификации с использованием интервальной модели Дирихле"</i>, In Нечеткие системы и мягкие вычисления (НСМВ-2014): Труды VI-й Всероссийской научно-практической конференции. СПб, 27-29 июня, 2014.  Vol. 1, pp. 17-26. Политехника-сервис.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-2014r','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-2014r" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-2014r,
+  author = {Л.В. Уткин},
+  title = {Новый композиционный алгоритм классификации с использованием интервальной модели Дирихле},
+  booktitle = {Нечеткие системы и мягкие вычисления (НСМВ-2014): Труды VI-й Всероссийской научно-практической конференции},
+  publisher = {Политехника-сервис},
+  year = {2014},
+  volume = {1},
+  pages = {17-26}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Gogolevsky-14" class="entry">
+	<td>Л.В. Уткин АГ (2014), <i>"Робастная модель классификации интервальных качественных данных при малой выборке на основе метода Монте-Карло"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 206, pp. 155-168.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Gogolevsky-14','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Gogolevsky-14" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Gogolevsky-14,
+  author = {Л.В. Уткин, А.С. Гоголевский},
+  title = {Робастная модель классификации интервальных качественных данных при малой выборке на основе метода Монте-Карло},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2014},
+  volume = {206},
+  pages = {155-168}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Gurov-Chech-2014" class="entry">
+	<td>Уткин Л, Жук Ю, Гуров С and Чех А (2014), <i>"Метод отбора значимых ДНК-маркеров на основе модификации алгоритма добавления-удаления признаков"</i>, In Труды 17-ой Международной конференции по мягким вычислениям и измерениям (SCM'2014). Санкт-Петербург, май, 2014.  Vol. 1, pp. 175-178. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Gurov-Chech-2014','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Gurov-Chech-2014" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-Gurov-Chech-2014,
+  author = {Л.В. Уткин and Ю.А. Жук and С.В. Гуров and А.И. Чех},
+  title = {Метод отбора значимых ДНК-маркеров на основе модификации алгоритма добавления-удаления признаков},
+  booktitle = {Труды 17-ой Международной конференции по мягким вычислениям и измерениям (SCM'2014)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2014},
+  volume = {1},
+  pages = {175-178}
+}
+</pre></td>
+</tr>
+<tr id="Zhuk-Egorov-Utkin-2014" class="entry">
+	<td>Жук ЮА, Егоров АА and Уткин ЛВ (2014), <i>"Математическая модель отбора параметров зимостойкости древесных растений на основе методов Лассо и эластичной сети"</i>, In Нечеткие системы и мягкие вычисления (НСМВ-2014): Труды VI-й Всероссийской научно-практической конференции. СПб.  Vol. 1, pp. 213-222. Политехника-сервис.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zhuk-Egorov-Utkin-2014','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zhuk-Egorov-Utkin-2014" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Zhuk-Egorov-Utkin-2014,
+  author = {Жук Ю.А., Егоров А.А., Уткин Л.В.},
+  title = {Математическая модель отбора параметров зимостойкости древесных растений на основе методов Лассо и эластичной сети},
+  booktitle = {Нечеткие системы и мягкие вычисления (НСМВ-2014): Труды VI-й Всероссийской научно-практической конференции},
+  publisher = {Политехника-сервис},
+  year = {2014},
+  volume = {1},
+  pages = {213-222}
+}
+</pre></td>
+</tr>
+<tr id="Zhuk-Utkin-Egorov-Potokina-14" class="entry">
+	<td>Жук Ю, Уткин Л, Егоров А and Потокина Е (2014), <i>"Отбор значимых ДНК-маркеров для селекции лесообразующих пород"</i>, In Актуальные проблемы развития лесного комплекса: материалы Международной научно-технической конференции. Вологда , pp. 13-16. ВоГУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zhuk-Utkin-Egorov-Potokina-14','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zhuk-Utkin-Egorov-Potokina-14" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Zhuk-Utkin-Egorov-Potokina-14,
+  author = {Ю.А. Жук, Л.В. Уткин, А.А. Егоров, Е.К. Потокина},
+  title = {Отбор значимых ДНК-маркеров для селекции лесообразующих пород},
+  booktitle = {Актуальные проблемы развития лесного комплекса: материалы Международной научно-технической конференции},
+  publisher = {ВоГУ},
+  year = {2014},
+  pages = {13-16}
+}
+</pre></td>
+</tr>
+<tr id="Potokina-Zlotina-Utkin-Zhuk-13" class="entry">
+	<td>Потокина Е, Злотина М, Уткин Л and Жук Ю (2013), <i>"Методы ассоциативного картирования и геномной селекции у растений с использованием комбинированного алгоритма отбора ДНК-маркеров"</i>, In Труды 16-ой Международной конференции по мягким вычислениям и измерениям (SCM'2013). Санкт-Петербург  Vol. 2, pp. 19-22. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Potokina-Zlotina-Utkin-Zhuk-13','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Potokina-Zlotina-Utkin-Zhuk-13" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Potokina-Zlotina-Utkin-Zhuk-13,
+  author = {Е.К. Потокина and М.М. Злотина and Л.В. Уткин and Ю.А. Жук},
+  title = {Методы ассоциативного картирования и геномной селекции у растений с использованием комбинированного алгоритма отбора ДНК-маркеров},
+  booktitle = {Труды 16-ой Международной конференции по мягким вычислениям и измерениям (SCM'2013)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2013},
+  volume = {2},
+  pages = {19-22}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Alekseev-Utkin-13" class="entry">
+	<td>Селиховкин А, Алексеев А and Уткин Л (2013), <i>"Проблемы и перспективы научно-технического и кадрового обеспечения развития лесного комплекса Российской Федерации"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 202, pp. 15-27.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Alekseev-Utkin-13','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Alekseev-Utkin-13" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Selihovkin-Alekseev-Utkin-13,
+  author = {А.В. Селиховкин, А.С. Алексеев, Л.В. Уткин,},
+  title = {Проблемы и перспективы научно-технического и кадрового обеспечения развития лесного комплекса Российской Федерации},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2013},
+  volume = {202},
+  pages = {15-27}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin-2013a" class="entry">
+	<td>Уткин В and Уткин Л (2013), <i>"Расчет надежности грунтовых оснований и фундаментов машин при ограниченной информации на стадии эксплуатации"</i> Вологды , pp. 135. ВоГУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin-2013a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin-2013a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Utkin-2013a,
+  author = {В.С. Уткин and Л.В. Уткин},
+  title = {Расчет надежности грунтовых оснований и фундаментов машин при ограниченной информации на стадии эксплуатации},
+  publisher = {ВоГУ},
+  year = {2013},
+  pages = {135}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-13d" class="entry">
+	<td>Уткин Л and Жук Ю (2013), <i>"Комбинированные модели классификации с ограничением множества весов на основе робастной модели засорения"</i>, In Труды 16-ой Международной конференции по мягким вычислениям и измерениям (SCM'2013). Санкт-Петербург  Vol. 2, pp. 15-18. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-13d','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-13d" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-13d,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Комбинированные модели классификации с ограничением множества весов на основе робастной модели засорения},
+  booktitle = {Труды 16-ой Международной конференции по мягким вычислениям и измерениям (SCM'2013)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2013},
+  volume = {2},
+  pages = {15-18}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-13e" class="entry">
+	<td>Уткин Л and Жук Ю (2013), <i>"Робастная модель обнаружения аномалий с использованием модели засорения"</i>, Вестник компьютерных и информационных технологий.  Vol. 707(7), pp. 47-51.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-13e','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-13e" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zhuk-13e,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Робастная модель обнаружения аномалий с использованием модели засорения},
+  journal = {Вестник компьютерных и информационных технологий},
+  year = {2013},
+  volume = {707},
+  number = {7},
+  pages = {47-51}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Chekh-Botan-13" class="entry">
+	<td>Уткин Л, Жук Ю, Чех А and Ботян Ю (2013), <i>"Размывание априорной информации для повышения точности решения задачи одноклассовой классификации"</i>, In Труды 16-ой Международной конференции по мягким вычислениям и измерениям (SCM'2013). Санкт-Петербург  Vol. 1, pp. 27-30. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Chekh-Botan-13','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Chekh-Botan-13" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-Chekh-Botan-13,
+  author = {Л.В. Уткин and Ю.А. Жук and А.И. Чех and Ю.И. Ботян},
+  title = {Размывание априорной информации для повышения точности решения задачи одноклассовой классификации},
+  booktitle = {Труды 16-ой Международной конференции по мягким вычислениям и измерениям (SCM'2013)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2013},
+  volume = {1},
+  pages = {27-30}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Egorov-etal-13" class="entry">
+	<td>Уткин Л, Жук Ю, Егоров A, Васильев Н, Потокина Е and Чех А (2013), <i>"Алгоритм отбора ДНК-маркеров на основе неравенства Фреше"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 205, pp. 172-183.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Egorov-etal-13','bibtex')">BibTeX</a>] [<a href="http://spbftu.ru/UserFiles/Image/izvesti/18-205.pdf" target="_blank">URL</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Egorov-etal-13" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zhuk-Egorov-etal-13,
+  author = {Л.В. Уткин, Ю.А. Жук, A.A. Егоров, Н.П. Васильев, Е.К. Потокина, А.И. Чех},
+  title = {Алгоритм отбора ДНК-маркеров на основе неравенства Фреше},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2013},
+  volume = {205},
+  pages = {172-183},
+  url = {http://spbftu.ru/UserFiles/Image/izvesti/18-205.pdf}
+}
+</pre></td>
+</tr>
+<tr id="Zhuk-Utkin-Selihovkin-13" class="entry">
+	<td>Жук Ю, Уткин Л and Селиховкин И (2013), <i>"Робастная модель классификации интервальных качественных данных при малой выборке на основе метода Монте-Карло"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 201, pp. 213-229.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zhuk-Utkin-Selihovkin-13','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zhuk-Utkin-Selihovkin-13" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Zhuk-Utkin-Selihovkin-13,
+  author = {Ю.А. Жук, Л.В. Уткин, И.А. Селиховкин},
+  title = {Робастная модель классификации интервальных качественных данных при малой выборке на основе метода Монте-Карло},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2013},
+  volume = {201},
+  pages = {213-229}
+}
+</pre></td>
+</tr>
+<tr id="Gogolevsky-Utkin12" class="entry">
+	<td>Гоголевский А and Уткин Л (2012), <i>"Метод опорных векторов в задаче классификации объектов лесных систем"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции. Вологда, декабрь, 2012. , pp. 3-5. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Gogolevsky-Utkin12','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Gogolevsky-Utkin12" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Gogolevsky-Utkin12,
+  author = {А.С. Гоголевский and Л.В. Уткин},
+  title = {Метод опорных векторов в задаче классификации объектов лесных систем},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции},
+  publisher = {ВоГТУ},
+  year = {2012},
+  pages = {3-5}
+}
+</pre></td>
+</tr>
+<tr id="Ilushenko-Utkin12" class="entry">
+	<td>Илющенко В and Уткин Л (2012), <i>"Текстурная сегментация и анализ дефектов на поверхности пиломатериала"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции. Вологда, декабрь, 2012. , pp. 97-100. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Ilushenko-Utkin12','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Ilushenko-Utkin12" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Ilushenko-Utkin12,
+  author = {В.В. Илющенко and Л.В. Уткин},
+  title = {Текстурная сегментация и анализ дефектов на поверхности пиломатериала},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции},
+  publisher = {ВоГТУ},
+  year = {2012},
+  pages = {97-100}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Selihovkin-12" class="entry">
+	<td>Л.В. Уткин ИС (2012), <i>"Модель классификации на основе расширенной обучающей выборки с использованием доверительных интервалов параметров распределений вероятностей признаков"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 198, pp. 239-248.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Selihovkin-12','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Selihovkin-12" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Selihovkin-12,
+  author = {Л.В. Уткин, И.А. Селиховкин},
+  title = {Модель классификации на основе расширенной обучающей выборки с использованием доверительных интервалов параметров распределений вероятностей признаков},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2012},
+  volume = {198},
+  pages = {239-248}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin-2012" class="entry">
+	<td>В.С. Уткин ЛУ (2012), <i>"Избранные научные труды по проблемам надежности деталей машин"</i> Вологда , pp. 110. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin-2012','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin-2012" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Utkin-2012,
+  author = {В.С. Уткин, Л.В. Уткин},
+  title = {Избранные научные труды по проблемам надежности деталей машин},
+  publisher = {ВоГТУ},
+  year = {2012},
+  pages = {110}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin-2012b" class="entry">
+	<td>Уткин В and Уткин Л (2012), <i>"Расчет надежности деталей машин с использованием усеченных интервальных функций распределения вероятностей"</i>, Вестник машиностроения. (7), pp. 13-15.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin-2012b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin-2012b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Utkin-2012b,
+  author = {В.С. Уткин and Л.В. Уткин},
+  title = {Расчет надежности деталей машин с использованием усеченных интервальных функций распределения вероятностей},
+  journal = {Вестник машиностроения},
+  year = {2012},
+  number = {7},
+  pages = {13-15}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-2012c" class="entry">
+	<td>Уткин Л and Жук Ю (2012), <i>"Робастные модели одноклассовой классификации и крайние точки множества вероятностей"</i>, In Сборник докладов 15-й Международной конференции по мягким вычислениям и измерениям (SCM'2012). Санкт-Петербург  Vol. 1, pp. 220-224. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-2012c','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-2012c" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-2012c,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Робастные модели одноклассовой классификации и крайние точки множества вероятностей},
+  booktitle = {Сборник докладов 15-й Международной конференции по мягким вычислениям и измерениям (SCM'2012)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2012},
+  volume = {1},
+  pages = {220-224}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-2012g" class="entry">
+	<td>Л.В. Уткин ЮЖ (2012), <i>"Программа одноклассовой классификации на основе обобщенных робастных моделей засорения"</i> (2012616682 от 25.07.2012)
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-2012g','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-2012g" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@patent{Utkin-Zhuk-2012g,
+  author = {Л.В. Уткин, Ю.А. Жук},
+  title = {Программа одноклассовой классификации на основе обобщенных робастных моделей засорения},
+  year = {2012},
+  number = {2012616682 от 25.07.2012}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Selihovkin-12" class="entry">
+	<td>Уткин Л, Жук Ю and Селиховкин И (2012), <i>"Модель классификации на основе неполной информации о признаках в виде их средних значений"</i>, Искусственный интеллект и принятие решений. (2), pp. 95-105.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Selihovkin-12','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Selihovkin-12" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zhuk-Selihovkin-12,
+  author = {Л.В. Уткин and Ю.А. Жук and И.А. Селиховкин},
+  title = {Модель классификации на основе неполной информации о признаках в виде их средних значений},
+  journal = {Искусственный интеллект и принятие решений},
+  year = {2012},
+  number = {2},
+  pages = {95-105}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Selihovkin-2012b" class="entry">
+	<td>Уткин Л, Жук Ю and Селиховкин И (2012), <i>"Система бинарной классификации при интервальных наблюдениях и генерации элементов обучающей выборки"</i> (2012616681 от 25.07.2012)
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Selihovkin-2012b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Selihovkin-2012b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@patent{Utkin-Zhuk-Selihovkin-2012b,
+  author = {Л.В. Уткин, Ю.А. Жук, И.А. Селиховкин},
+  title = {Система бинарной классификации при интервальных наблюдениях и генерации элементов обучающей выборки},
+  year = {2012},
+  number = {2012616681 от 25.07.2012}
+}
+</pre></td>
+</tr>
+<tr id="Gogolevsky-Utkin11a" class="entry">
+	<td>Гоголевский А and Уткин Л (2011), <i>"Постановка задачи классификации различных объектов лесных систем при дистанционном зондировании и малом объеме обучающей выборки"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции. Вологда, декабрь, 2011. , pp. 3-4. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Gogolevsky-Utkin11a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Gogolevsky-Utkin11a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Gogolevsky-Utkin11a,
+  author = {А.С. Гоголевский and Л.В. Уткин},
+  title = {Постановка задачи классификации различных объектов лесных систем при дистанционном зондировании и малом объеме обучающей выборки},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции},
+  publisher = {ВоГТУ},
+  year = {2011},
+  pages = {3-4}
+}
+</pre></td>
+</tr>
+<tr id="Ilushenko-Utkin11a" class="entry">
+	<td>Илющенко В and Уткин Л (2011), <i>"Анализ признаков сортообразующих дефектов для обучающейся системы автоматической сортировки"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции. Вологда, декабрь, 2011. , pp. 75-77. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Ilushenko-Utkin11a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Ilushenko-Utkin11a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Ilushenko-Utkin11a,
+  author = {В.В. Илющенко and Л.В. Уткин},
+  title = {Анализ признаков сортообразующих дефектов для обучающейся системы автоматической сортировки},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной научно-технической конференции},
+  publisher = {ВоГТУ},
+  year = {2011},
+  pages = {75-77}
+}
+</pre></td>
+</tr>
+<tr id="Ilushenko-Utkin-2011b" class="entry">
+	<td>Илющенко В and Уткин Л (2011), <i>"Робастные статистические модели классификации: минимаксная стратегия при лингвистической и петлевой функциях потерь"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 197, pp. 212-221.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Ilushenko-Utkin-2011b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Ilushenko-Utkin-2011b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Ilushenko-Utkin-2011b,
+  author = {В.В. Илющенко and Л.В. Уткин},
+  title = {Робастные статистические модели классификации: минимаксная стратегия при лингвистической и петлевой функциях потерь},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2011},
+  volume = {197},
+  pages = {212-221}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Alexeev-Utkin11" class="entry">
+	<td>Селиховкин А, Алексеев А and Уткин Л (2011), <i>"Задачи и перспективы подготовки кадров в условиях инновационного развития лесного комплекса"</i>, In Сборник трудов Пятого Санкт-Петербургского конгресса "Профессиональное образование, наука, инновации в XXI веке". , pp. 177-184.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Alexeev-Utkin11','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Alexeev-Utkin11" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Selihovkin-Alexeev-Utkin11,
+  author = {А.В. Селиховкин and А.С. Алексеев and Л.В. Уткин},
+  title = {Задачи и перспективы подготовки кадров в условиях инновационного развития лесного комплекса},
+  booktitle = {Сборник трудов Пятого Санкт-Петербургского конгресса "Профессиональное образование, наука, инновации в XXI веке"},
+  year = {2011},
+  pages = {177-184}
+}
+</pre></td>
+</tr>
+<tr id="Selih-Utkin-Gogolevsky-2011" class="entry">
+	<td>Селиховкин И, Уткин Л and Гоголевский А (2011), <i>"Новая робастная модель классификации с дискретными признаками на основе метода Монте-Карло в задачах медицинской диагностики"</i>, Вестник Российской Военно-медицинской академии. (5), pp. 176-180.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selih-Utkin-Gogolevsky-2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selih-Utkin-Gogolevsky-2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Selih-Utkin-Gogolevsky-2011,
+  author = {И.А. Селиховкин and Л.В. Уткин and А.С. Гоголевский},
+  title = {Новая робастная модель классификации с дискретными признаками на основе метода Монте-Карло в задачах медицинской диагностики},
+  journal = {Вестник Российской Военно-медицинской академии},
+  year = {2011},
+  number = {5},
+  pages = {176-180}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Gogolevsky-2011" class="entry">
+	<td>Уткин Л and Гоголевский А (2011), <i>"Задача классификации объектов лесных систем при дистанционном зондировании и малом объеме обучающей выборки на основе множеств распределений вероятностей"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 194, pp. 156-164.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Gogolevsky-2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Gogolevsky-2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Gogolevsky-2011,
+  author = {Л.В. Уткин and А.С. Гоголевский},
+  title = {Задача классификации объектов лесных систем при дистанционном зондировании и малом объеме обучающей выборки на основе множеств распределений вероятностей},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2011},
+  volume = {194},
+  pages = {156-164}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ilushenko-2011" class="entry">
+	<td>Уткин Л and Илющенко В (2011), <i>"Определение оптимальных функций плотностей распределения вероятностей в задаче классификации с использованием границ Колмогорова-Смирнова"</i>, Известия Санкт-Петербургской лесотехнической академии.  Vol. 195, pp. 190-200.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ilushenko-2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ilushenko-2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Ilushenko-2011,
+  author = {Л.В. Уткин and В.В. Илющенко},
+  title = {Определение оптимальных функций плотностей распределения вероятностей в задаче классификации с использованием границ Колмогорова-Смирнова},
+  journal = {Известия Санкт-Петербургской лесотехнической академии},
+  year = {2011},
+  volume = {195},
+  pages = {190-200}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Jarigina2011" class="entry">
+	<td>Уткин Л and Ярыгина О (2011), <i>"Расчет надежности железобетонных элементов на продавливание при ограниченной информации о параметрах"</i>, Строительная механика и расчет сооружений.  Vol. 235(2), pp. 63 - 68.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Jarigina2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Jarigina2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Jarigina2011,
+  author = {Л.В. Уткин and О.В. Ярыгина},
+  title = {Расчет надежности железобетонных элементов на продавливание при ограниченной информации о параметрах},
+  journal = {Строительная механика и расчет сооружений},
+  year = {2011},
+  volume = {235},
+  number = {2},
+  pages = {63 - 68}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin-2011" class="entry">
+	<td>Уткин В and Уткин Л (2011), <i>"Новые методы расчета надежности строительных конструкций"</i> Вологда  ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin-2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin-2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Utkin-2011,
+  author = {В.С. Уткин and Л.В. Уткин},
+  title = {Новые методы расчета надежности строительных конструкций},
+  publisher = {ВоГТУ},
+  year = {2011},
+  note = {Уч. пособие}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin-Redkin-2011" class="entry">
+	<td>Уткин Л, Уткин В and Редькин А (2011), <i>"Расчет надежности стальных рам по критерию устойчивости при многопараметрической нагрузке с использованием неравенства Чебышева"</i>, Надежность. (3), pp. 60-67.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin-Redkin-2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin-Redkin-2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Utkin-Redkin-2011,
+  author = {Л.В. Уткин, В.С. Уткин, А.Н. Редькин},
+  title = {Расчет надежности стальных рам по критерию устойчивости при многопараметрической нагрузке с использованием неравенства Чебышева},
+  journal = {Надежность},
+  year = {2011},
+  number = {3},
+  pages = {60-67}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk11" class="entry">
+	<td>Уткин Л and Жук Ю (2011), <i>"Новый метод классификации при известных средних значениях ненаблюдаемых признаков"</i>, In Моделирование и анализ безопасности и риска в сложных системах: Труды международной научной школы МА БР - 2011.. СПб , pp. 143-148. ГУАП.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk11','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk11" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk11,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  editor = {И.А. Рябинин and Е.Д. Соложенцев},
+  title = {Новый метод классификации при известных средних значениях ненаблюдаемых признаков},
+  booktitle = {Моделирование и анализ безопасности и риска в сложных системах: Труды международной научной школы МА БР - 2011.},
+  publisher = {ГУАП},
+  year = {2011},
+  pages = {143-148}
+}
+</pre></td>
+</tr>
+<tr id="Zhuk-Fomin-Utkin2011" class="entry">
+	<td>Жук Ю, Фомин В and Уткин Л (2011), <i>"Определение рефлексивных показателей для оценки эффективности использования дисплейных форм наглядности"</i>, Известия Российского государственного педагогического университета имени А.И.Герцена.  Vol. 138, pp. 84-94.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zhuk-Fomin-Utkin2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zhuk-Fomin-Utkin2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Zhuk-Fomin-Utkin2011,
+  author = {Ю.А. Жук and В.В. Фомин and Л.В. Уткин},
+  title = {Определение рефлексивных показателей для оценки эффективности использования дисплейных форм наглядности},
+  journal = {Известия Российского государственного педагогического университета имени А.И.Герцена},
+  year = {2011},
+  volume = {138},
+  pages = {84-94}
+}
+</pre></td>
+</tr>
+<tr id="Zhuk-Utkin-Selikhovkin-2011" class="entry">
+	<td>Жук Ю, Селиховкин И and Уткин Л (2011), <i>"Алгоритм классификации при наличии средних значений признаков на основе минимаксной стратегии принятия решений"</i>, In Сборник докладов 14-й Международной конференции по мягким вычислениям и измерениям (SCM'2011). Санкт-Петербург , pp. 97-100. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zhuk-Utkin-Selikhovkin-2011','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zhuk-Utkin-Selikhovkin-2011" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Zhuk-Utkin-Selikhovkin-2011,
+  author = {Жук, Ю.А. and Селиховкин, И.А. and Уткин, Л.В.},
+  title = {Алгоритм классификации при наличии средних значений признаков на основе минимаксной стратегии принятия решений},
+  booktitle = {Сборник докладов 14-й Международной конференции по мягким вычислениям и измерениям (SCM'2011)},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2011},
+  pages = {97-100}
+}
+</pre></td>
+</tr>
+<tr id="Nguyen-Utkin10" class="entry">
+	<td>Нгуен ВХ and Уткин Л (2010), <i>"Пессимистический подход в задачах многокритериального принятия решения при частичной информации о важности критериев и при нескольких уровнях критериев"</i>, In Труды межвузовской научно-практической конференции молодых ученых и специалистов "Современные проблемы экономики и менеджмента предприятий лесного комплекса". Санкт-Петербург , pp. 73-77. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Nguyen-Utkin10','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Nguyen-Utkin10" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Nguyen-Utkin10,
+  author = {Ван Хьеу Нгуен and Л.В. Уткин},
+  title = {Пессимистический подход в задачах многокритериального принятия решения при частичной информации о важности критериев и при нескольких уровнях критериев},
+  booktitle = {Труды межвузовской научно-практической конференции молодых ученых и специалистов "Современные проблемы экономики и менеджмента предприятий лесного комплекса"},
+  publisher = {СПбГЛТА},
+  year = {2010},
+  pages = {73-77}
+}
+</pre></td>
+</tr>
+<tr id="Nikiforov-Utkin10" class="entry">
+	<td>Никифоров А and Уткин Л (2010), <i>"Система рейтинговой оценки и мониторинга образовательной и научной деятельности профессорско-преподавательского состава СПбГЛТА"</i>, In Материалы международной научно-методологической конференции "Труды СПбГЛТА. Актуальные проблемы развития высшей школы". Санкт-Петербург , pp. 76-79. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Nikiforov-Utkin10','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Nikiforov-Utkin10" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Nikiforov-Utkin10,
+  author = {А.А. Никифоров and Л.В. Уткин},
+  title = {Система рейтинговой оценки и мониторинга образовательной и научной деятельности профессорско-преподавательского состава СПбГЛТА},
+  booktitle = {Материалы международной научно-методологической конференции "Труды СПбГЛТА. Актуальные проблемы развития высшей школы"},
+  publisher = {СПбГЛТА},
+  year = {2010},
+  pages = {76-79}
+}
+</pre></td>
+</tr>
+<tr id="Nikiforov-Utkin10a" class="entry">
+	<td>Никифоров А and Уткин Л (2010), <i>"Рейтинговая оценка и мониторинг образовательной и научной деятельности вуза"</i>, Университетское управление: практика и анализ.  Vol. 67(3), pp. 54-61.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Nikiforov-Utkin10a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Nikiforov-Utkin10a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Nikiforov-Utkin10a,
+  author = {А.А. Никифоров and Л.В. Уткин},
+  title = {Рейтинговая оценка и мониторинг образовательной и научной деятельности вуза},
+  journal = {Университетское управление: практика и анализ},
+  year = {2010},
+  volume = {67},
+  number = {3},
+  pages = {54-61}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin10" class="entry">
+	<td>Селиховкин А and Уткин Л (2010), <i>"Лесной научно-образовательный инновационный комплекс как основа современного образования"</i>, In Материалы международной научно-методологической конференции "Труды СПбГЛТА. Актуальные проблемы развития высшей школы". Санкт-Петербург , pp. 23-25. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin10','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin10" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Selihovkin-Utkin10,
+  author = {А.В. Селиховкин and Л.В. Уткин},
+  title = {Лесной научно-образовательный инновационный комплекс как основа современного образования},
+  booktitle = {Материалы международной научно-методологической конференции "Труды СПбГЛТА. Актуальные проблемы развития высшей школы"},
+  publisher = {СПбГЛТА},
+  year = {2010},
+  pages = {23-25}
+}
+</pre></td>
+</tr>
+<tr id="Utkin10c" class="entry">
+	<td>Уткин Л (2010), <i>"Новый консервативный метод решения задачи восстановления зависимости по обучающей выборке ограниченного объема с использованием обобщенного метода моментов"</i>, In Информационные системы и технологии. Сборник научно-технических статей. Санкт-Петербург , pp. 121-128. СПбРГПУ им. А.И.Герцена.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin10c','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin10c" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin10c,
+  author = {Л.В. Уткин},
+  title = {Новый консервативный метод решения задачи восстановления зависимости по обучающей выборке ограниченного объема с использованием обобщенного метода моментов},
+  booktitle = {Информационные системы и технологии. Сборник научно-технических статей},
+  publisher = {СПбРГПУ им. А.И.Герцена},
+  year = {2010},
+  pages = {121-128}
+}
+</pre></td>
+</tr>
+<tr id="Utkin10e" class="entry">
+	<td>Уткин Л (2010), <i>"Минимаксная стратегия восстановления регрессионной зависимости при непараметрическом оценивании шума"</i>, In Известия Санкт-Пертербурской лесотехнической академии. Санкт-Петербург  Vol. 190, pp. 197-206. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin10e','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin10e" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin10e,
+  author = {Л.В. Уткин},
+  title = {Минимаксная стратегия восстановления регрессионной зависимости при непараметрическом оценивании шума},
+  booktitle = {Известия Санкт-Пертербурской лесотехнической академии},
+  publisher = {СПбГЛТА},
+  year = {2010},
+  volume = {190},
+  pages = {197-206}
+}
+</pre></td>
+</tr>
+<tr id="Utkin10f" class="entry">
+	<td>Уткин Л (2010), <i>"Новый класс осторожных непараметрических моделей надежности программного обеспечения на основе обобщения функционала риска"</i>, In Моделирование и анализ безопасности и риска в сложных системах: Труды международной научной школы МА БР - 2010.. СПб , pp. 170-175. ГУАП.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin10f','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin10f" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin10f,
+  author = {Л.В. Уткин},
+  editor = {И.А. Рябинин and Е.Д. Соложенцев},
+  title = {Новый класс осторожных непараметрических моделей надежности программного обеспечения на основе обобщения функционала риска},
+  booktitle = {Моделирование и анализ безопасности и риска в сложных системах: Труды международной научной школы МА БР - 2010.},
+  publisher = {ГУАП},
+  year = {2010},
+  pages = {170-175}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Fomin10" class="entry">
+	<td>Уткин Л and Фомин В (2010), <i>"Минимаксный подход для построения класса моделей надежности программного обеспечения на основе комбинации обобщенного Байесовского вывода и элементов теории обучения"</i>, Научное приборостроение.  Vol. 20(3), pp. 49-55.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Fomin10','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Fomin10" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Fomin10,
+  author = {Л.В. Уткин and В.В. Фомин},
+  title = {Минимаксный подход для построения класса моделей надежности программного обеспечения на основе комбинации обобщенного Байесовского вывода и элементов теории обучения},
+  journal = {Научное приборостроение},
+  year = {2010},
+  volume = {20},
+  number = {3},
+  pages = {49--55}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ilushenko10" class="entry">
+	<td>Уткин Л and Илющенко В (2010), <i>"Рисковые ситуации в задаче определения границ дефектов пиломатериалов"</i>, In Моделирование и анализ безопасности и риска в сложных системах: Труды международной научной школы МА БР - 2010.. СПб , pp. 507-509. ГУАП.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ilushenko10','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ilushenko10" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Ilushenko10,
+  author = {Л.В. Уткин and В.В. Илющенко},
+  editor = {И.А. Рябинин and Е.Д. Соложенцев},
+  title = {Рисковые ситуации в задаче определения границ дефектов пиломатериалов},
+  booktitle = {Моделирование и анализ безопасности и риска в сложных системах: Труды международной научной школы МА БР - 2010.},
+  publisher = {ГУАП},
+  year = {2010},
+  pages = {507-509}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Ilushenko10a" class="entry">
+	<td>Уткин Л and Илющенко В (2010), <i>"Критерии выбора обучающих примеров для искусственных нейронных сетей при распознавании дефектов древесины"</i>, In Актуальные проблемы развития лесного комплекса: Труды международной научно-технической конференции. Вологда , pp. 149-152. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Ilushenko10a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Ilushenko10a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Ilushenko10a,
+  author = {Л.В. Уткин and В.В. Илющенко},
+  title = {Критерии выбора обучающих примеров для искусственных нейронных сетей при распознавании дефектов древесины},
+  booktitle = {Актуальные проблемы развития лесного комплекса: Труды международной научно-технической конференции},
+  publisher = {ВоГТУ},
+  year = {2010},
+  pages = {149-152}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Nguyen10a" class="entry">
+	<td>Уткин Л and Ван ХН (2010), <i>"Пессимистический подход в задачах многокритериального принятия решения при частичной информации о важности критериев и сравнительных оценках альтернатив"</i>, In Известия Санкт-Пертербурской лесотехнической академии. Санкт-Петербург  Vol. 191, pp. 221-230. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Nguyen10a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Nguyen10a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin-Nguyen10a,
+  author = {Л.В. Уткин and Х. Нгуен Ван},
+  title = {Пессимистический подход в задачах многокритериального принятия решения при частичной информации о важности критериев и сравнительных оценках альтернатив},
+  booktitle = {Известия Санкт-Пертербурской лесотехнической академии},
+  publisher = {СПбГЛТА},
+  year = {2010},
+  volume = {191},
+  pages = {221-230}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk10" class="entry">
+	<td>Уткин Л and Жук Ю (2010), <i>"Новый класс интервальных регрессионных моделей с использованием неравенства Кантелли"</i>, In Труды Санкт-Петербургской государственной лесотехнической академии. Экономические проблемы лесного сектора. СПб , pp. 54-62. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk10','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk10" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin-Zhuk10,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Новый класс интервальных регрессионных моделей с использованием неравенства Кантелли},
+  booktitle = {Труды Санкт-Петербургской государственной лесотехнической академии. Экономические проблемы лесного сектора},
+  publisher = {СПбГЛТА},
+  year = {2010},
+  pages = {54-62}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk10a" class="entry">
+	<td>Уткин Л and Жук Ю (2010), <i>"Построение одного класса нечетких регрессионных моделей"</i>, In Труды 13-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 1, pp. 138-142. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk10a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk10a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk10a,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Построение одного класса нечетких регрессионных моделей},
+  booktitle = {Труды 13-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2010},
+  volume = {1},
+  pages = {138-142}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk10b" class="entry">
+	<td>Уткин Л and Жук Ю (2010), <i>"Метод решения задачи построения регрессионной зависимости по обучающей выборке с использованием обобщенного метода моментов"</i>, In Материалы международной научно-методологической конференции "Труды СПбГЛТА. Актуальные проблемы развития высшей школы". Санкт-Петербург , pp. 360-363. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk10b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk10b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk10b,
+  author = {Л.В. Уткин and Ю.А. Жук},
+  title = {Метод решения задачи построения регрессионной зависимости по обучающей выборке с использованием обобщенного метода моментов},
+  booktitle = {Материалы международной научно-методологической конференции "Труды СПбГЛТА. Актуальные проблемы развития высшей школы"},
+  publisher = {СПбГЛТА},
+  year = {2010},
+  pages = {360-363}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Ilushenko10a" class="entry">
+	<td>Уткин Л, Жук Ю and Илющенко В (2010), <i>"Класс регрессионных моделей с использованием множества распределений Парето"</i>, In Информационные системы и технологии. Сборник научно-технических статей. Санкт-Петербург , pp. 129-137. СПбРГПУ им. А.И.Герцена.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Ilushenko10a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Ilushenko10a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin-Zhuk-Ilushenko10a,
+  author = {Л.В. Уткин and Ю.А. Жук and В.В. Илющенко},
+  title = {Класс регрессионных моделей с использованием множества распределений Парето},
+  booktitle = {Информационные системы и технологии. Сборник научно-технических статей},
+  publisher = {СПбРГПУ им. А.И.Герцена},
+  year = {2010},
+  pages = {129-137}
+}
+</pre></td>
+</tr>
+<tr id="Zhuk-Utkin10" class="entry">
+	<td>Жук Ю and Уткин Л (2010), <i>"Оценка целесообразности использования дисплейных форм наглядности в образовательном процессе вуза при неполной информации"</i>, In Труды 13-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 2, pp. 109-112. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zhuk-Utkin10','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zhuk-Utkin10" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Zhuk-Utkin10,
+  author = {Ю.А. Жук and Л.В. Уткин},
+  title = {Оценка целесообразности использования дисплейных форм наглядности в образовательном процессе вуза при неполной информации},
+  booktitle = {Труды 13-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2010},
+  volume = {2},
+  pages = {109-112}
+}
+</pre></td>
+</tr>
+<tr id="Nguyen-Utkin09" class="entry">
+	<td>Ван ХН and Уткин Л (2009), <i>"Расширение метода анализа иерархий с использование теории Демпстера-Шейфера при двух уровнях критериев"</i>, In Труды межвузовской научно-практической конференции молодых ученых и специалистов. Современные проблемы экономики и менеджмента предприятий лесного комплекса.. СПб. , pp. 31-37. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Nguyen-Utkin09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Nguyen-Utkin09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Nguyen-Utkin09,
+  author = {Х. Нгуен Ван and Л.В. Уткин},
+  title = {Расширение метода анализа иерархий с использование теории Демпстера-Шейфера при двух уровнях критериев},
+  booktitle = {Труды межвузовской научно-практической конференции молодых ученых и специалистов. Современные проблемы экономики и менеджмента предприятий лесного комплекса.},
+  publisher = {СПбГЛТА},
+  year = {2009},
+  pages = {31-37}
+}
+</pre></td>
+</tr>
+<tr id="Nikiforov-Utkin09" class="entry">
+	<td>Никифоров А and Уткин Л (2009), <i>"Автоматизированная система рейтинговой оценки и мониторинга образовательной и научной деятельности вуза"</i>, In Информационные системы и технологии: теория и практика. Сб. научн. трудов. Вып.2. Санкт-Петербург , pp. 13-17. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Nikiforov-Utkin09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Nikiforov-Utkin09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Nikiforov-Utkin09,
+  author = {А.А. Никифоров and Л.В. Уткин},
+  title = {Автоматизированная система рейтинговой оценки и мониторинга образовательной и научной деятельности вуза},
+  booktitle = {Информационные системы и технологии: теория и практика. Сб. научн. трудов. Вып.2},
+  publisher = {СПбГЛТА},
+  year = {2009},
+  pages = {13-17}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin09" class="entry">
+	<td>Селиховкин А and Уткин Л (2009), <i>"Проблемы развития лесной науки, образования и инноваций"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной НТК. Вологда, декабрь, 2009. , pp. 211-213. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Selihovkin-Utkin09,
+  author = {А.В. Селиховкин and Л.В. Уткин},
+  title = {Проблемы развития лесной науки, образования и инноваций},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной НТК},
+  publisher = {ВоГТУ},
+  year = {2009},
+  pages = {211-213}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Gorbachev09" class="entry">
+	<td>Уткин Л and Горбачев Г (2009), <i>"Комбинирование методов теории многокритериального принятия решений на примере задачи определения наиболее информативного сайта ВУЗа РФ"</i>, In Материалы международной научно-методологической конференции "Актуальные проблемы развития высшей школы". Санкт-Петербург , pp. 191-195. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Gorbachev09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Gorbachev09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Gorbachev09,
+  author = {Л.В. Уткин and Г.В. Горбачев},
+  title = {Комбинирование методов теории многокритериального принятия решений на примере задачи определения наиболее информативного сайта ВУЗа РФ},
+  booktitle = {Материалы международной научно-методологической конференции "Актуальные проблемы развития высшей школы"},
+  publisher = {СПбГЛТА},
+  year = {2009},
+  pages = {191-195}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Gorbachev09a" class="entry">
+	<td>Уткин Л and Горбачев Г (2009), <i>"Сравнительный анализ информативности WEB-сайтов ведущих вузов страны как задачи многокритериального принятия решений"</i>, In Материалы IV международной научно-практической конференции "Управление качеством в современной организации". Пенза , pp. 67-68. Пензенский государственный университет.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Gorbachev09a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Gorbachev09a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Gorbachev09a,
+  author = {Л.В. Уткин and Г.В. Горбачев},
+  title = {Сравнительный анализ информативности WEB-сайтов ведущих вузов страны как задачи многокритериального принятия решений},
+  booktitle = {Материалы IV международной научно-практической конференции "Управление качеством в современной организации"},
+  publisher = {Пензенский государственный университет},
+  year = {2009},
+  pages = {67-68}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Gorbachev09b" class="entry">
+	<td>Уткин Л and Горбачев Г (2009), <i>"Многокритериальное принятие решений на основе расширенных оценок относительной важности критериев"</i>, In Труды 13-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении. Санкт-Петербург  Vol. 1, pp. 113-114. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Gorbachev09b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Gorbachev09b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Gorbachev09b,
+  author = {Л.В. Уткин and Г.В. Горбачев},
+  title = {Многокритериальное принятие решений на основе расширенных оценок относительной важности критериев},
+  booktitle = {Труды 13-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении},
+  publisher = {Издательство Политехнического университета},
+  year = {2009},
+  volume = {1},
+  pages = {113-114}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Nguyen09" class="entry">
+	<td>Уткин Л and Ван ХН (2009), <i>"Минимаксная стратегия в задачах многокритериального принятия решений при линейных оценках важности критериев"</i>, In Труды 13-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении. Санкт-Петербург  Vol. 2, pp. 15-17. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Nguyen09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Nguyen09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Nguyen09,
+  author = {Л.В. Уткин and Х. Нгуен Ван},
+  title = {Минимаксная стратегия в задачах многокритериального принятия решений при линейных оценках важности критериев},
+  booktitle = {Труды 13-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении},
+  publisher = {Издательство Политехнического университета},
+  year = {2009},
+  volume = {2},
+  pages = {15-17}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Trostinsky-Gorbachev09" class="entry">
+	<td>Уткин Л, Тростинский Д and Горбачев Г (2009), <i>"Многокритериальные задачи принятия решений второго порядка при интервальных сравнительных оценках критериев"</i>, In Труды 12-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 2, pp. 89-92. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Trostinsky-Gorbachev09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Trostinsky-Gorbachev09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Trostinsky-Gorbachev09,
+  author = {Л.В. Уткин and Д.Р. Тростинский and Г.В. Горбачев},
+  title = {Многокритериальные задачи принятия решений второго порядка при интервальных сравнительных оценках критериев},
+  booktitle = {Труды 12-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2009},
+  volume = {2},
+  pages = {89-92}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin09a" class="entry">
+	<td>Уткин В and Уткин Л (2009), <i>"Расчет надежности валов по критерию прочности при вероятностных и возможностных переменных в математической модели предельного состояния"</i>, Вестник машиностроения. (7), pp. 31-34.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin09a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin09a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Utkin09a,
+  author = {В.С. Уткин and Л.В. Уткин},
+  title = {Расчет надежности валов по критерию прочности при вероятностных и возможностных переменных в математической модели предельного состояния},
+  journal = {Вестник машиностроения},
+  year = {2009},
+  number = {7},
+  pages = {31-34}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko09a" class="entry">
+	<td>Уткин Л and Затенко С (2009), <i>"Особенности тестирования программ при их использовании в учебном процессе"</i>, In Материалы международной научно-методологической конференции "Актуальные проблемы развития высшей школы". Санкт-Петербург , pp. 195-198. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko09a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko09a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zatenko09a,
+  author = {Л.В. Уткин and С.И. Затенко},
+  title = {Особенности тестирования программ при их использовании в учебном процессе},
+  booktitle = {Материалы международной научно-методологической конференции "Актуальные проблемы развития высшей школы"},
+  publisher = {СПбГЛТА},
+  year = {2009},
+  pages = {195-198}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko09b" class="entry">
+	<td>Уткин Л and Затенко С (2009), <i>"Интервальные байесовские модели надежности программ с использованием неоднородных процессов Пуассона"</i>, In Труды 13-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении. Санкт-Петербург  Vol. 2, pp. 184-185. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko09b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko09b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zatenko09b,
+  author = {Л.В. Уткин and С.И. Затенко},
+  title = {Интервальные байесовские модели надежности программ с использованием неоднородных процессов Пуассона},
+  booktitle = {Труды 13-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении},
+  publisher = {Издательство Политехнического университета},
+  year = {2009},
+  volume = {2},
+  pages = {184-185}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko09d" class="entry">
+	<td>Уткин Л and Затенко С (2009), <i>"Интервальная модель тестирования программного обеспечения на основе обобщенных процессов Пуассона"</i>, In Информационные системы и технологии: теория и практика. Сб. научн. трудов. Вып.2. Санкт-Петербург , pp. 8-12. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko09d','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko09d" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin-Zatenko09d,
+  author = {Л.В. Уткин and С.И. Затенко},
+  title = {Интервальная модель тестирования программного обеспечения на основе обобщенных процессов Пуассона},
+  booktitle = {Информационные системы и технологии: теория и практика. Сб. научн. трудов. Вып.2},
+  publisher = {СПбГЛТА},
+  year = {2009},
+  pages = {8-12}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko09e" class="entry">
+	<td>Уткин Л and Затенко С (2009), <i>"Обобщение неоднородных процессов Пуассона с использованием множеств распределений в моделях роста"</i>, In Труды 12-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 1, pp. 152-155. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko09e','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko09e" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zatenko09e,
+  author = {Л.В. Уткин and С.И. Затенко},
+  title = {Обобщение неоднородных процессов Пуассона с использованием множеств распределений в моделях роста},
+  booktitle = {Труды 12-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2009},
+  volume = {1},
+  pages = {152-155}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko-Coolen09" class="entry">
+	<td>Уткин Л, Затенко С and Коолен Ф (2009), <i>"Новые интервальные байесовские модели надежности программного обеспечения на основе неоднородных процессов Пуассона"</i>, Проблемы управления. (6), pp. 52-58.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko-Coolen09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko-Coolen09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Zatenko-Coolen09,
+  author = {Л.В. Уткин and С.И. Затенко and Ф. Коолен},
+  title = {Новые интервальные байесовские модели надежности программного обеспечения на основе неоднородных процессов Пуассона},
+  journal = {Проблемы управления},
+  year = {2009},
+  number = {6},
+  pages = {52-58}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zhuk-Trostinsky09" class="entry">
+	<td>Уткин Л, Жук Ю and Тростинский Д (2009), <i>"Новая интервальная регрессионная модель на основе расширенной модели Дирихле"</i>, In Труды 12-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 1, pp. 127-130. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zhuk-Trostinsky09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zhuk-Trostinsky09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zhuk-Trostinsky09,
+  author = {Л.В. Уткин and Ю.А. Жук and Д.Р. Тростинский},
+  title = {Новая интервальная регрессионная модель на основе расширенной модели Дирихле},
+  booktitle = {Труды 12-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2009},
+  volume = {1},
+  pages = {127-130}
+}
+</pre></td>
+</tr>
+<tr id="Zatenko-Utkin09" class="entry">
+	<td>Затенко С and Уткин Л (2009), <i>"Оценка качества программ для обеспечения экономической эффективности автоматизированных систем управления лесопромышленного комплекса"</i>, In Труды межвузовской научно-практической конференции молодых ученых и специалистов. Современные проблемы экономики и менеджмента предприятий лесного комплекса.. СПб. , pp. 27-31. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zatenko-Utkin09','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zatenko-Utkin09" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Zatenko-Utkin09,
+  author = {С.И. Затенко and Л.В. Уткин},
+  title = {Оценка качества программ для обеспечения экономической эффективности автоматизированных систем управления лесопромышленного комплекса},
+  booktitle = {Труды межвузовской научно-практической конференции молодых ученых и специалистов. Современные проблемы экономики и менеджмента предприятий лесного комплекса.},
+  publisher = {СПбГЛТА},
+  year = {2009},
+  pages = {27-31}
+}
+</pre></td>
+</tr>
+<tr id="Zatenko-Utkin09a" class="entry">
+	<td>Затенко С and Уткин Л (2009), <i>"Обобщенная байесовская бета-геометрическая модель надежности программного обеспечения дискретного времени"</i>, In Известия Санкт-Петербургской лесотехнической академии. Вып.186. Санкт-Петербург , pp. 196-202. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zatenko-Utkin09a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zatenko-Utkin09a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Zatenko-Utkin09a,
+  author = {С.И. Затенко and Л.В. Уткин},
+  title = {Обобщенная байесовская бета-геометрическая модель надежности программного обеспечения дискретного времени},
+  booktitle = {Известия Санкт-Петербургской лесотехнической академии. Вып.186},
+  publisher = {СПбГЛТА},
+  year = {2009},
+  pages = {196-202}
+}
+</pre></td>
+</tr>
+<tr id="Zatenko-Utkin09b" class="entry">
+	<td>Затенко С and Уткин Л (2009), <i>"Новая дискретная байесовская модель надежности программного обеспечения с использованием интервальных вероятностей"</i>, Вестник Московского государственного университета леса - Лесной вестник.  Vol. 65(2), pp. 158-163.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zatenko-Utkin09b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zatenko-Utkin09b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Zatenko-Utkin09b,
+  author = {С.И. Затенко and Л.В. Уткин},
+  title = {Новая дискретная байесовская модель надежности программного обеспечения с использованием интервальных вероятностей},
+  journal = {Вестник Московского государственного университета леса - Лесной вестник},
+  year = {2009},
+  volume = {65},
+  number = {2},
+  pages = {158-163}
+}
+</pre></td>
+</tr>
+<tr id="Gurov-Utkin08" class="entry">
+	<td>Гуров С and Уткин Л (2008), <i>"Принятие решений при неполной информации и немонотонной функции полезности"</i>, In Труды Санкт-Петербургской государственной лесотехнической академии. Экономические проблемы лесного сектора. СПб. , pp. 58-66. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Gurov-Utkin08','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Gurov-Utkin08" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inbook{Gurov-Utkin08,
+  author = {С.В. Гуров and Л.В. Уткин},
+  title = {Принятие решений при неполной информации и немонотонной функции полезности},
+  booktitle = {Труды Санкт-Петербургской государственной лесотехнической академии. Экономические проблемы лесного сектора},
+  publisher = {СПбГЛТА},
+  year = {2008},
+  pages = {58-66}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin08a" class="entry">
+	<td>Селиховкин А and Уткин Л (2008), <i>"Интеграция науки и образования в лесной отрасли: реалии и возможности"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной НТК. Вологда, декабрь, 2008. , pp. 3-4. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin08a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin08a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Selihovkin-Utkin08a,
+  author = {А.В. Селиховкин and Л.В. Уткин},
+  title = {Интеграция науки и образования в лесной отрасли: реалии и возможности},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной НТК},
+  publisher = {ВоГТУ},
+  year = {2008},
+  pages = {3-4}
+}
+</pre></td>
+</tr>
+<tr id="Simanova-Utkin08a" class="entry">
+	<td>Симанова Н and Уткин Л (2008), <i>"Неточные предпочтения для мягкого ранжирования объектов в условиях неполноты информации"</i>, In Труды 11-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 1, pp. 96-99. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Simanova-Utkin08a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Simanova-Utkin08a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Simanova-Utkin08a,
+  author = {Н.В. Симанова and Л.В. Уткин},
+  title = {Неточные предпочтения для мягкого ранжирования объектов в условиях неполноты информации},
+  booktitle = {Труды 11-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2008},
+  volume = {1},
+  pages = {96-99}
+}
+</pre></td>
+</tr>
+<tr id="Utkin08a" class="entry">
+	<td>Уткин Л (2008), <i>"Многокритериальное пессимистическое принятие решений при неполной информации о критериях и сравнительной информации об альтернативах"</i>, In Труды 11-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 2, pp. 69-72. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin08a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin08a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin08a,
+  author = {Л.В. Уткин},
+  title = {Многокритериальное пессимистическое принятие решений при неполной информации о критериях и сравнительной информации об альтернативах},
+  booktitle = {Труды 11-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2008},
+  volume = {2},
+  pages = {69-72}
+}
+</pre></td>
+</tr>
+<tr id="Utkin08b" class="entry">
+	<td>Уткин Л (2008), <i>"Обобщенная модель многокритериального принятия решений в транспортных задачах"</i>, In Актуальные проблемы управления информационными системами. Сборник трудов II Всероссийской НПК студентов, аспирантов, молодых ученых и преподавателей "Актуальные проблемы управления техническими, информационными, социально-экономическими и транспортными системами". Санкт-Петербург , pp. 7-12. СЗТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin08b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin08b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin08b,
+  author = {Л.В. Уткин},
+  editor = {Н.В. Афанасьева},
+  title = {Обобщенная модель многокритериального принятия решений в транспортных задачах},
+  booktitle = {Актуальные проблемы управления информационными системами. Сборник трудов II Всероссийской НПК студентов, аспирантов, молодых ученых и преподавателей "Актуальные проблемы управления техническими, информационными, социально-экономическими и транспортными системами"},
+  publisher = {СЗТУ},
+  year = {2008},
+  pages = {7-12}
+}
+</pre></td>
+</tr>
+<tr id="Utkin08d" class="entry">
+	<td>Уткин Л (2008), <i>"Перспективы развития лесного образования и науки: стратегические задачи и пути их решения"</i>, In Материалы межрегиональной конференции "Партийный проект "Российский лес" и развитие лесного комплекса Северо-Запада: тенденции, проекты, перспективы". Санкт-Петербург , pp. 48-51. Космос, Москва.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin08d','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin08d" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin08d,
+  author = {Л.В. Уткин},
+  title = {Перспективы развития лесного образования и науки: стратегические задачи и пути их решения},
+  booktitle = {Материалы межрегиональной конференции "Партийный проект "Российский лес" и развитие лесного комплекса Северо-Запада: тенденции, проекты, перспективы"},
+  publisher = {Космос, Москва},
+  year = {2008},
+  pages = {48-51}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Egorov-Simanova08" class="entry">
+	<td>Уткин Л, Егоров А and Симанова Н (2008), <i>"Групповая оценка опасностей как задача принятия решений при неполной и неточной экспертной информации"</i>, In Труды 12-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении. Санкт-Петербург  Vol. 2, pp. 103-104. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Egorov-Simanova08','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Egorov-Simanova08" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Egorov-Simanova08,
+  author = {Л.В. Уткин and А.А. Егоров and Н.В. Симанова},
+  title = {Групповая оценка опасностей как задача принятия решений при неполной и неточной экспертной информации},
+  booktitle = {Труды 12-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении},
+  publisher = {Издательство Политехнического университета},
+  year = {2008},
+  volume = {2},
+  pages = {103-104}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Nguyen08" class="entry">
+	<td>Уткин Л and Ван ХН (2008), <i>"Максиминная стратегия многокритериального группового принятия решений в рамках метода анализа иерархий с использованием теории Демпстера-Шейфера"</i>, In Труды 12-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении. Санкт-Петербург  Vol. 1, pp. 29-30. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Nguyen08','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Nguyen08" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Nguyen08,
+  author = {Л.В. Уткин and Х. Нгуен Ван},
+  title = {Максиминная стратегия многокритериального группового принятия решений в рамках метода анализа иерархий с использованием теории Демпстера-Шейфера},
+  booktitle = {Труды 12-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении},
+  publisher = {Издательство Политехнического университета},
+  year = {2008},
+  volume = {1},
+  pages = {29-30}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Nguyen08a" class="entry">
+	<td>Уткин Л and Ван ХН (2008), <i>"Пессимистический подход к многокритериальному принятию решений в рамках теории случайных множеств"</i>, In Информационные системы и технологии: Теория и практика. Санкт-Петербург , pp. 75-84. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Nguyen08a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Nguyen08a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin-Nguyen08a,
+  author = {Л.В. Уткин and Х. Нгуен Ван},
+  title = {Пессимистический подход к многокритериальному принятию решений в рамках теории случайных множеств},
+  booktitle = {Информационные системы и технологии: Теория и практика},
+  publisher = {СПбГЛТА},
+  year = {2008},
+  pages = {75-84}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin08" class="entry">
+	<td>Уткин В and Уткин Л (2008), <i>"Расчет надежности механических систем при ограниченной статистической информации"</i> Вологда  ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin08','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin08" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Utkin08,
+  author = {В.С. Уткин and Л.В. Уткин},
+  title = {Расчет надежности механических систем при ограниченной статистической информации},
+  publisher = {ВоГТУ},
+  year = {2008}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko08a" class="entry">
+	<td>Уткин Л and Затенко С (2008), <i>"Разработка класса обобщенных интервальных дискретных моделей надежности программного обеспечения на основе множеств распределений вероятностей"</i>, In Труды 11-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург  Vol. 1, pp. 133-136. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko08a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko08a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Zatenko08a,
+  author = {Л.В. Уткин and С.И. Затенко},
+  title = {Разработка класса обобщенных интервальных дискретных моделей надежности программного обеспечения на основе множеств распределений вероятностей},
+  booktitle = {Труды 11-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2008},
+  volume = {1},
+  pages = {133-136}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko08b" class="entry">
+	<td>Уткин Л and Затенко С (2008), <i>"Концепция для разработки нового класса интервальных моделей надежности программного обеспечения"</i>, In Известия Санкт-Петербургской лесотехнической академии. Вып.184. Санкт-Петербург , pp. 237-245. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko08b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko08b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin-Zatenko08b,
+  author = {Л.В. Уткин and С.И. Затенко},
+  title = {Концепция для разработки нового класса интервальных моделей надежности программного обеспечения},
+  booktitle = {Известия Санкт-Петербургской лесотехнической академии. Вып.184},
+  publisher = {СПбГЛТА},
+  year = {2008},
+  pages = {237-245}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Zatenko08c" class="entry">
+	<td>Уткин Л and Затенко С (2008), <i>"Интервальная модель надежности программного обеспечения на основе сочетания байесовского подхода и принципа максимума правдоподобия"</i>, In Известия Санкт-Петербургской лесотехнической академии. Вып.185. Санкт-Петербург , pp. 274-280. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Zatenko08c','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Zatenko08c" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@incollection{Utkin-Zatenko08c,
+  author = {Л.В. Уткин and С.И. Затенко},
+  title = {Интервальная модель надежности программного обеспечения на основе сочетания байесовского подхода и принципа максимума правдоподобия},
+  booktitle = {Известия Санкт-Петербургской лесотехнической академии. Вып.185},
+  publisher = {СПбГЛТА},
+  year = {2008},
+  pages = {274-280}
+}
+</pre></td>
+</tr>
+<tr id="Chernoby-Utkin07" class="entry">
+	<td>Чернобай М and Уткин Л (2007), <i>"Регрессионный анализ интервальных данных с использованием Дирихле-распределения"</i>, In Известия Санкт-Петербургской лесотехнической академии. СПб.  Vol. 180, pp. 272-282. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Chernoby-Utkin07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Chernoby-Utkin07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inbook{Chernoby-Utkin07,
+  author = {М.Л. Чернобай and Л.В. Уткин},
+  title = {Регрессионный анализ интервальных данных с использованием Дирихле-распределения},
+  booktitle = {Известия Санкт-Петербургской лесотехнической академии},
+  publisher = {СПбГЛТА},
+  year = {2007},
+  volume = {180},
+  pages = {272-282}
+}
+</pre></td>
+</tr>
+<tr id="Egorov-Bektobekov-Neshataev-Utkin07" class="entry">
+	<td>Егоров А, Бектобеков Г, Нешатаев В and Уткин Л (2007), <i>"Методологические основы безопасности подготовки студентов при проведении практик в природных экосистемах"</i>, In Труды Первого Санкт-Петербургского конгресса "Профессиональное образование, наука, инновации в XXI веке". Санкт-Петербург , pp. 216-219. СПбГУ ИТМО.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Egorov-Bektobekov-Neshataev-Utkin07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Egorov-Bektobekov-Neshataev-Utkin07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Egorov-Bektobekov-Neshataev-Utkin07,
+  author = {А.А. Егоров and Г.В. Бектобеков and В.Ю. Нешатаев and Л.В. Уткин},
+  title = {Методологические основы безопасности подготовки студентов при проведении практик в природных экосистемах},
+  booktitle = {Труды Первого Санкт-Петербургского конгресса "Профессиональное образование, наука, инновации в XXI веке"},
+  publisher = {СПбГУ ИТМО},
+  year = {2007},
+  pages = {216-219}
+}
+</pre></td>
+</tr>
+<tr id="Egorov-Neshataev-Utkin07" class="entry">
+	<td>Егоров А, Нешатаев В and Уткин Л (2007), <i>"Использование данных дистанционного зондирования Земли для выявления опасных факторов при проведении учебных практик в природных экосистемах"</i>, In Труды Третьей Международной конференции Земля из космоса - наиболее эффективные решения. Москва , pp. 296-297. Инженерно-технологический Центр СканЭкс, НП Прозрачный мир, Издательство Бином.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Egorov-Neshataev-Utkin07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Egorov-Neshataev-Utkin07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Egorov-Neshataev-Utkin07,
+  author = {А.А. Егоров and В.Ю. Нешатаев and Л.В. Уткин},
+  title = {Использование данных дистанционного зондирования Земли для выявления опасных факторов при проведении учебных практик в природных экосистемах},
+  booktitle = {Труды Третьей Международной конференции Земля из космоса - наиболее эффективные решения},
+  publisher = {Инженерно-технологический Центр СканЭкс, НП Прозрачный мир, Издательство Бином},
+  year = {2007},
+  pages = {296-297}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin07a" class="entry">
+	<td>Селиховкин А and Уткин Л (2007), <i>"Подходы к созданию научно-образовательного инновационного комплекса в лесной отрасли"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной НТК. Вологда, декабрь, 2007. , pp. 140-142. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin07a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin07a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Selihovkin-Utkin07a,
+  author = {А.В. Селиховкин and Л.В. Уткин},
+  title = {Подходы к созданию научно-образовательного инновационного комплекса в лесной отрасли},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной НТК},
+  publisher = {ВоГТУ},
+  year = {2007},
+  pages = {140-142}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin07b" class="entry">
+	<td>Селиховкин А and Уткин Л (2007), <i>"Информационная поддержка научной и экспертно-консалтинговой деятельности вузов"</i>, In Приоритеты научно-технического и инновационного развития региона. Материалы второй ежегодной научно-практической конференции.. Санкт-Петербург, октябрь, 2007. , pp. 115-117.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin07b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin07b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Selihovkin-Utkin07b,
+  author = {А.В. Селиховкин and Л.В. Уткин},
+  title = {Информационная поддержка научной и экспертно-консалтинговой деятельности вузов},
+  booktitle = {Приоритеты научно-технического и инновационного развития региона. Материалы второй ежегодной научно-практической конференции.},
+  year = {2007},
+  pages = {115-117}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin-Gorbachev07" class="entry">
+	<td>Селиховкин А, Уткин Л and Горбачев В (2007), <i>"Разработка системы информационной поддержки научной и инновационной деятельности в лесном комплексе: от концепции к реализации"</i>, Лес и бизнес. (2(32)), pp. 24-29.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin-Gorbachev07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin-Gorbachev07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Selihovkin-Utkin-Gorbachev07,
+  author = {А.В. Селиховкин and Л.В. Уткин and В.А. Горбачев},
+  title = {Разработка системы информационной поддержки научной и инновационной деятельности в лесном комплексе: от концепции к реализации},
+  journal = {Лес и бизнес},
+  year = {2007},
+  number = {2(32)},
+  pages = {24-29}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin-Soloviev07" class="entry">
+	<td>Селиховкин А, Уткин Л and Соловьев А (2007), <i>"Санкт-Петербургская государственная лесотехническая академия как база лесного образования, науки и инноваций на новом уровне"</i>, Федеральный деловой журнал "ТСР". , pp. 15-17.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin-Soloviev07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin-Soloviev07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Selihovkin-Utkin-Soloviev07,
+  author = {А.В. Селиховкин and Л.В. Уткин and А.Н. Соловьев},
+  title = {Санкт-Петербургская государственная лесотехническая академия как база лесного образования, науки и инноваций на новом уровне},
+  journal = {Федеральный деловой журнал "ТСР"},
+  year = {2007},
+  pages = {15-17}
+}
+</pre></td>
+</tr>
+<tr id="Utkin07d" class="entry">
+	<td>Уткин Л (2007), <i>"Принятие решений при непрерывной функции распределения возможностей: две модели"</i>, In Труды 10-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург , pp. 261-264. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin07d','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin07d" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin07d,
+  author = {Л.В. Уткин},
+  title = {Принятие решений при непрерывной функции распределения возможностей: две модели},
+  booktitle = {Труды 10-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2007},
+  pages = {261-264}
+}
+</pre></td>
+</tr>
+<tr id="Utkin07e" class="entry">
+	<td>Уткин Л (2007), <i>"Осторожная модель индивидуального страхования в лесном комплексе"</i>, In Актуальные проблемы развития лесного комплекса. Материалы международной НТК. Вологда, декабрь, 2007. , pp. 154-157. ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin07e','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin07e" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin07e,
+  author = {Л.В. Уткин},
+  title = {Осторожная модель индивидуального страхования в лесном комплексе},
+  booktitle = {Актуальные проблемы развития лесного комплекса. Материалы международной НТК},
+  publisher = {ВоГТУ},
+  year = {2007},
+  pages = {154-157}
+}
+</pre></td>
+</tr>
+<tr id="Utkin07k" class="entry">
+	<td>Уткин Л (2007), <i>"Анализ риска и принятие решений при неполной информации"</i> СПб.  Наука.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin07k','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin07k" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin07k,
+  author = {Л.В. Уткин},
+  title = {Анализ риска и принятие решений при неполной информации},
+  publisher = {Наука},
+  year = {2007}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Egorov07" class="entry">
+	<td>Уткин Л and Егоров А (2007), <i>"Системный анализ опасностей и рисков в вузах и расчет обобщенного показателя опасности с использованием аналога метода анализа иерархий"</i>, In Труды 11-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении. Санкт-Петербург  Vol. 3, pp. 294-296. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Egorov07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Egorov07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Egorov07,
+  author = {Л.В. Уткин and А.А. Егоров},
+  title = {Системный анализ опасностей и рисков в вузах и расчет обобщенного показателя опасности с использованием аналога метода анализа иерархий},
+  booktitle = {Труды 11-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении},
+  publisher = {Издательство Политехнического университета},
+  year = {2007},
+  volume = {3},
+  pages = {294-296}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Egorov07a" class="entry">
+	<td>Уткин Л and Егоров А (2007), <i>"Прогнозирование чрезвычайных ситуаций в природных экосистемах при прохождении учебных практик студентами лесных вузов с использованием аналога метода анализа иерархий"</i>, In Новости МЦЛХП: Международный центр лесного хозяйства и лесной промышленности. СПб  Vol. 8, pp. 7-10. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Egorov07a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Egorov07a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Egorov07a,
+  author = {Л.В. Уткин and А.А. Егоров},
+  title = {Прогнозирование чрезвычайных ситуаций в природных экосистемах при прохождении учебных практик студентами лесных вузов с использованием аналога метода анализа иерархий},
+  booktitle = {Новости МЦЛХП: Международный центр лесного хозяйства и лесной промышленности},
+  publisher = {СПбГЛТА},
+  year = {2007},
+  volume = {8},
+  pages = {7-10}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Lapin07" class="entry">
+	<td>Уткин Л and Лапин А (2007), <i>"Модели гарантийных обязательств в условиях ограниченной и неточной исходной информации"</i>, Управление риском. (2), pp. 53-60.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Lapin07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Lapin07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Lapin07,
+  author = {Л.В. Уткин and А.Э. Лапин},
+  title = {Модели гарантийных обязательств в условиях ограниченной и неточной исходной информации},
+  journal = {Управление риском},
+  year = {2007},
+  number = {2},
+  pages = {53-60}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Simanova07" class="entry">
+	<td>Уткин Л and Симанова Н (2007), <i>"Использование модели Дирихле и теории свидетельств для модификации метода анализа иерархий"</i>, In Труды 11-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении. Санкт-Петербург  Vol. 1, pp. 116-117. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Simanova07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Simanova07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Simanova07,
+  author = {Л.В. Уткин and Н.В. Симанова},
+  title = {Использование модели Дирихле и теории свидетельств для модификации метода анализа иерархий},
+  booktitle = {Труды 11-ой Международной научно-практической конференции: Системный анализ в проектировании и управлении},
+  publisher = {Издательство Политехнического университета},
+  year = {2007},
+  volume = {1},
+  pages = {116-117}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Simanova07a" class="entry">
+	<td>Уткин Л and Симанова Н (2007), <i>"Обобщение метода анализа иерархий для принятия решений при неточных сравнениях с использованием теории Демпстера-Шейфера"</i>, Известия ОрелГТУ, Серия Фундаментальные и прикладные проблемы техники и технологии: информационные системы и технологии. (4), pp. 223-228.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Simanova07a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Simanova07a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Simanova07a,
+  author = {Л.В. Уткин and Н.В. Симанова},
+  title = {Обобщение метода анализа иерархий для принятия решений при неточных сравнениях с использованием теории Демпстера-Шейфера},
+  journal = {Известия ОрелГТУ, Серия Фундаментальные и прикладные проблемы техники и технологии: информационные системы и технологии},
+  year = {2007},
+  number = {4},
+  pages = {223-228}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Simanova07b" class="entry">
+	<td>Уткин Л and Симанова Н (2007), <i>"Метод анализа иерархий при неполной информации о критериях и альтернативах"</i>, Нечеткие системы и мягкие вычисления.  Vol. 2(2), pp. 31-40.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Simanova07b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Simanova07b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Utkin-Simanova07b,
+  author = {Л.В. Уткин and Н.В. Симанова},
+  title = {Метод анализа иерархий при неполной информации о критериях и альтернативах},
+  journal = {Нечеткие системы и мягкие вычисления},
+  year = {2007},
+  volume = {2},
+  number = {2},
+  pages = {31-40}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Simanova-Lapin07" class="entry">
+	<td>Уткин Л, Симанова Н and Лапин А (2007), <i>"Осторожные байесовские модели анализа риска на основе априорного гамма-распределения и их применение"</i>, In Труды 10-ой Международной конференции по мягким вычислениям и измерениям. Санкт-Петербург , pp. 216-219. СПбГЭТУ (ЛЭТИ).
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Simanova-Lapin07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Simanova-Lapin07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Simanova-Lapin07,
+  author = {Л.В. Уткин and Н.В. Симанова and А.Э. Лапин},
+  title = {Осторожные байесовские модели анализа риска на основе априорного гамма-распределения и их применение},
+  booktitle = {Труды 10-ой Международной конференции по мягким вычислениям и измерениям},
+  publisher = {СПбГЭТУ (ЛЭТИ)},
+  year = {2007},
+  pages = {216-219}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin05" class="entry">
+	<td>Уткин Л and Уткин В (2007), <i>"Осторожные оценки надежности при неточных измерениях с использованием обобщенной модели Дирихле"</i>, In Научно-технические проблемы прогнозирования надежности и долговечности конструкций и методы их решения. Труды 6-ой Междун. конф.. Санкт-Петербург , pp. 406-408. Издательство Политехнического университета.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin05','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin05" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Utkin-Utkin05,
+  author = {Л.В. Уткин and В.С. Уткин},
+  title = {Осторожные оценки надежности при неточных измерениях с использованием обобщенной модели Дирихле},
+  booktitle = {Научно-технические проблемы прогнозирования надежности и долговечности конструкций и методы их решения. Труды 6-ой Междун. конф.},
+  publisher = {Издательство Политехнического университета},
+  year = {2007},
+  pages = {406-408}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Utkin07" class="entry">
+	<td>Уткин В and Уткин Л (2007), <i>"Надежность машин и оборудования"</i> Вологда  ВоГТУ.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Utkin07','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Utkin07" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Utkin07,
+  author = {В.С. Уткин and Л.В. Уткин},
+  title = {Надежность машин и оборудования},
+  publisher = {ВоГТУ},
+  year = {2007},
+  note = {Учебное пособие}
+}
+</pre></td>
+</tr>
+<tr id="Selihovkin-Utkin06" class="entry">
+	<td>Селиховкин А and Уткин Л (2006), <i>"Основные направления развития научно-образовательного инновационного комплекса Санкт-Петербургской государственной лесотехнической академии"</i>, Лес и бизнес. (10(30)), pp. 27-31.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Selihovkin-Utkin06','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Selihovkin-Utkin06" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@article{Selihovkin-Utkin06,
+  author = {А.В. Селиховкин and Л.В. Уткин},
+  title = {Основные направления развития научно-образовательного инновационного комплекса Санкт-Петербургской государственной лесотехнической академии},
+  journal = {Лес и бизнес},
+  year = {2006},
+  number = {10(30)},
+  pages = {27-31}
+}
+</pre></td>
+</tr>
+<tr id="Zajaz-Utkin-Lopatnikov05" class="entry">
+	<td>Заяц А, Уткин Л and Лопатников М (2005), <i>"Анализ риска при реализации нового метода упреждающей загрузки WEB-страниц"</i>, In Известия Санкт-Петербургской лесотехнической академии. СПб.  Vol. 174, pp. 120-127. СПбГЛТА.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Zajaz-Utkin-Lopatnikov05','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Zajaz-Utkin-Lopatnikov05" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inbook{Zajaz-Utkin-Lopatnikov05,
+  author = {А.М. Заяц and Л.В. Уткин and М.В. Лопатников},
+  title = {Анализ риска при реализации нового метода упреждающей загрузки WEB-страниц},
+  booktitle = {Известия Санкт-Петербургской лесотехнической академии},
+  publisher = {СПбГЛТА},
+  year = {2005},
+  volume = {174},
+  pages = {120-127}
+}
+</pre></td>
+</tr>
+<tr id="Shaburov-Utkin04a" class="entry">
+	<td>Шабуров С and Уткин Л (2004), <i>"Ускоренные испытания на безопасность функционирования железнодорожных транспортных микропроцессорных систем управления"</i>, In Труды Международной научной школы: Моделирование и анализ безопасности, риска и качества в сложных системах. Санкт-Петербург , pp. 509-514. ИПМАШ РАН.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Shaburov-Utkin04a','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Shaburov-Utkin04a" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@inproceedings{Shaburov-Utkin04a,
+  author = {С.П. Шабуров and Л.В. Уткин},
+  title = {Ускоренные испытания на безопасность функционирования железнодорожных транспортных микропроцессорных систем управления},
+  booktitle = {Труды Международной научной школы: Моделирование и анализ безопасности, риска и качества в сложных системах},
+  publisher = {ИПМАШ РАН},
+  year = {2004},
+  pages = {509-514}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Shubinsky00b" class="entry">
+	<td>Уткин Л and Шубинский И (2000), <i>"Нетрадиционные методы оценки надежности информационных систем"</i> Санкт-Петербург  Любавич.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Shubinsky00b','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Shubinsky00b" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Shubinsky00b,
+  author = {Л.В. Уткин and И.Б. Шубинский},
+  title = {Нетрадиционные методы оценки надежности информационных систем},
+  publisher = {Любавич},
+  year = {2000}
+}
+</pre></td>
+</tr>
+<tr id="Utkin-Gurov99m" class="entry">
+	<td>Гуров С and Уткин Л (1999), <i>"Надежность систем при неполной информации"</i> Санкт-Петербург  Любавич.
+	<p class="infolinks"> [<a href="javascript:toggleInfo('Utkin-Gurov99m','bibtex')">BibTeX</a>]</p>
+	</td>
+</tr>
+<tr id="bib_Utkin-Gurov99m" class="bibtex noshow">
+<td><b>BibTeX</b>:
+<pre>
+@book{Utkin-Gurov99m,
+  author = {С.В. Гуров and Л.В. Уткин},
+  title = {Надежность систем при неполной информации},
+  publisher = {Любавич},
+  year = {1999}
+}
+</pre></td>
+</tr>
+</tbody>
+</table>
+<footer>
+ <small>Created by <a href="http://jabref.sourceforge.net">JabRef</a> on 10/02/2020.</small>
+</footer>
+<!-- file generated by JabRef -->
+</body>
+</html>
