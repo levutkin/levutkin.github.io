@@ -3,9 +3,6 @@ main:
   - title: "Publications"
     url: /publications.html
 
-  - title: "Publications (in Russian)"
-    url: /publications_ru.html
-
   - title: "Teaching"
     url: /teaching/    
 
