@@ -25,9 +25,7 @@ Thesis: "Methods and models for the reliability and safety analysis of informati
 
 Publications
 ======
-  <ul>{% for post in site.publications %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
+
   
 Memberships and awards
 ======
