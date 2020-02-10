@@ -21,11 +21,6 @@ Thesis: "Variance reduction technique for computing the noise immunity measures 
 * DSc. Mathematical modelling, numerical methods and program systems. Saint-Petersburg State Institute of Technology (Technical University). 2001. 
 
 Thesis: "Methods and models for the reliability and safety analysis of information systems under incomplete information".
-
-
-Publications
-======
-
   
 Memberships and awards
 ======
