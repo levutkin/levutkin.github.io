@@ -14,5 +14,6 @@ location: ""
  1. [Деревья решений.](/files/Machine_Learning_LTU_4.pdf)
  1. [Нейронные сети.](/files/Machine_Learning_LTU_5.pdf)
  1. [Методы обучения без учителя.](/files/Machine_Learning_LTU_6.pdf)
+ 1. [Методы обучения без учителя.](/files/Machine_Learning_LTU_6.pdf)
 
 ...
