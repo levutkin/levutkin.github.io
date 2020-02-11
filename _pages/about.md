@@ -34,7 +34,7 @@ Memberships and awards
 [Dependability](https://www.dependability.ru/jour#); 
 [Izvestia of the Forest Technical Academy](http://en.spbftu.ru/publications/scientific-edition-izvestia-sankt-peterburgskoj-lesotehniceskoj-akademii/); 
 [SPIIRAN Proceedings](http://proceedings.spiiras.nw.ru/index.php/sp);
-European Journal of Technology and Design; 
+[European Journal of Technology and Design](http://ejournal4.com/en/index.html); 
 [Bulletin of the South Ural State University, series «Mathematics. Mechanics. Physics»](https://vestnik.susu.ru/mmph); 
 [Bulletin of the South Ural State University», series «Mathematical Modelling, Programming & Computer Software»](https://mmp.susu.ru/page/en/greet);
 [CAAI Transactions on Intelligence Technology](https://digital-library.theiet.org/content/journals/trit).
