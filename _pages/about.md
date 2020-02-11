@@ -12,15 +12,9 @@ redirect_from:
 
 Education
 ======
-* MS (with honors). Automation and telemetry. Leningrad Institute of Electrical Engineering (now St.Petersburg Electrotechnical University). 1986. 
-
-Thesis: "Program implementation and analysis of Reed-Solomon's coder-decoder".
-* PhD. Information processing and control systems. Leningrad Institute of Electrical Engineering (now St.Petersburg Electrotechnical University). 1989. 
-
-Thesis: "Variance reduction technique for computing the noise immunity measures of communication systems".
-* DSc. Mathematical modelling, numerical methods and program systems. Saint-Petersburg State Institute of Technology (Technical University). 2001. 
-
-Thesis: "Methods and models for the reliability and safety analysis of information systems under incomplete information".
+* MS (with honors). Automation and telemetry. Leningrad Institute of Electrical Engineering (now St.Petersburg Electrotechnical University). 1986. <br> Thesis: "Program implementation and analysis of Reed-Solomon's coder-decoder".
+* PhD. Information processing and control systems. Leningrad Institute of Electrical Engineering (now St.Petersburg Electrotechnical University). 1989. <br> Thesis: "Variance reduction technique for computing the noise immunity measures of communication systems".
+* DSc. Mathematical modelling, numerical methods and program systems. Saint-Petersburg State Institute of Technology (Technical University). 2001. <br> Thesis: "Methods and models for the reliability and safety analysis of information systems under incomplete information".
   
 Memberships and awards
 ======
