@@ -1,5 +1,5 @@
 ---
-title: "О лаборатории"
+title: "О лаборатории нейросетевых технологий и ИИ"
 collection: research
 type: ""
 permalink: /research/example
