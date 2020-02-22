@@ -2,7 +2,7 @@
 title: "Искусственный интеллект в медицине"
 collection: research
 type: ""
-permalink: /research/example
+permalink: /research/AI_in_medicine
 venue: "СПбПУ"
 date: 2020-02-22
 location: ""
