@@ -2,7 +2,7 @@
 title: "О лаборатории нейросетевых технологий и ИИ"
 collection: research
 type: ""
-permalink: /research/example
+permalink: /research/lab
 venue: "СПбПУ"
 date: 2020-01-01
 location: ""
