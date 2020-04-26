@@ -85,7 +85,9 @@ author:
   bio              : "Professor, Head of the Higher School of Applied Mathematics and Computational Physics, 
   Institute of Applied Mathematics and Mechanics"
   location         : "St. Petersburg"
-  employer         : "Peter the Great St. Petersburg Polytechnic University"
+  employer         : "Peter the Great" 
+                   : "St. Petersburg Polytechnic" 
+                   :  "University"
   pubmed           : 
   googlescholar    : "https://scholar.google.com/citations?user=lRC1KA0AAAAJ&hl=en"
   email            : "lev.utkin@list.ru"
