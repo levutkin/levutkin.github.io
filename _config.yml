@@ -10,8 +10,8 @@ locale                   : "en-US"
 title                    : "Home page of Lev V. Utkin"
 title_separator          : "-"
 name                     : "Lev Utkin"
-description              : "Professor, Head of the Higher School of Applied Mathematics and Computational Physics"
-url                      : 
+description              : "Professor, Head of the Higher School of Applied Mathematics and Computational Physics, Institute of Applied Mathematics and Mechanics, Peter the Great St. Petersburg Polytechnic University"
+url                      :  
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "academicpages/academicpages.github.io"
 teaser                   :  # filename of teaser fallback teaser image placed in /images/, .e.g. "500x300.png"
@@ -82,7 +82,7 @@ analytics:
 author:
   name             : "Lev Utkin"
   avatar           : "profile.png"
-  bio              : "Professor, Head of the Higher School of Applied Mathematics and Computational Physics"
+  bio              : "Professor, Head of the Higher School of Applied Mathematics and Computational Physics, , Institute of Applied Mathematics and Mechanics, Peter the Great St. Petersburg Polytechnic University"
   location         : "St. Petersburg"
   employer         : 
   pubmed           : 
