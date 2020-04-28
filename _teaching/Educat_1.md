@@ -74,8 +74,14 @@ location: ""
 
 Телефон +7 (812) 552-09-15
 
-e-mail alexey.lukashin@spbstu.ru      lev.utkin@mail.ru 
+e-mail: 
+
+alexey.lukashin@spbstu.ru
+
+utkin_lv@spbstu.ru 
 
 ссылки на соц. сети:  
+
 <https://vk.com/public190830876>
+
 <https://www.facebook.com/groups/469013647369407/>
