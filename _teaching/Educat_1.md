@@ -60,7 +60,7 @@ location: ""
 
 В рамках обучения планируются лекции приглашенных профессоров и специалистов из реального сектора экономики, выездные семинары, мастер классы ведущих технологических компаний, включая IBM, Intel, Nvidia. 
 
-В чтении лекций и исследований в рамках программы участвуют научная группа университета Мюнхена (Германия), профессор Томас Аугустин (Thomas Augustin, Professor of the Department of Statistics, Ludwig-Maximilians University Munich, Germany), и начная группа университета Дарем (Великобритания), профессор Фрэнк Коолен (Frank Coolen, Professor of the Department of Mathematical Sciences, Director of Postgraduate Studies, Durham University, UK).
+В чтении лекций и исследований в рамках программы участвуют научная группа университета Мюнхена (Германия), профессор Томас Аугустин (Thomas Augustin, Professor of the Department of Statistics, Ludwig-Maximilians University Munich, Germany), и научная группа университета Дарем (Великобритания), профессор Фрэнк Коолен (Frank Coolen, Professor of the Department of Mathematical Sciences, Director of Postgraduate Studies, Durham University, UK).
 
 НАУЧНЫЙ РУКОВОДИТЕЛЬ ПРОГРАММЫ:    
 
@@ -76,6 +76,6 @@ location: ""
 
 e-mail alexey.lukashin@spbstu.ru      lev.utkin@mail.ru 
 
-ссылки на соц. сети  
+ссылки на соц. сети:  
 https://vk.com/public190830876
 https://www.facebook.com/groups/469013647369407/ 
