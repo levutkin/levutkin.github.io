@@ -86,4 +86,3 @@ utkin_lv@spbstu.ru
 
 <https://www.facebook.com/groups/469013647369407/>
 
-<img src="https://github.com/levutkin/levutkin.github.io/tree/master/images/Utkin.jpg" alt="Уткин Лев Владимирович" width="200">
