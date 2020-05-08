@@ -3,6 +3,9 @@ main:
   - title: "Publications"
     url: /publications.html
 
+- title: "Publications in Russian (2017-2019)"
+    url: /Publications_rus.html
+    
   - title: "Research"
     url: /research/
 
