@@ -28,7 +28,7 @@
 
   <meta name="viewport" content="width=device-width">
   
-  <title>levutkin.github.io/lab.md at master · levutkin/levutkin.github.io · GitHub</title>
+  <title>levutkin.github.io/XAI_survival_analysis.md at master · levutkin/levutkin.github.io · GitHub</title>
     <meta name="description" content="Contribute to levutkin/levutkin.github.io development by creating an account on GitHub.">
     <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="GitHub">
   <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub">
@@ -91,7 +91,7 @@
   <meta name="octolytics-dimension-user_id" content="60878587" /><meta name="octolytics-dimension-user_login" content="levutkin" /><meta name="octolytics-dimension-repository_id" content="239492745" /><meta name="octolytics-dimension-repository_nwo" content="levutkin/levutkin.github.io" /><meta name="octolytics-dimension-repository_public" content="true" /><meta name="octolytics-dimension-repository_is_fork" content="false" /><meta name="octolytics-dimension-repository_network_root_id" content="239492745" /><meta name="octolytics-dimension-repository_network_root_nwo" content="levutkin/levutkin.github.io" /><meta name="octolytics-dimension-repository_explore_github_marketplace_ci_cta_shown" content="false" />
 
 
-    <link rel="canonical" href="https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md" data-pjax-transient>
+    <link rel="canonical" href="https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md" data-pjax-transient>
 
 
   <meta name="browser-stats-url" content="https://api.github.com/_private/browser/stats">
@@ -138,7 +138,7 @@
         <div class="d-flex flex-items-center">
               <a href="/join?ref_cta=Sign+up&amp;ref_loc=header+logged+out&amp;ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Fblob%2Fshow&amp;source=header-repo"
                 class="d-inline-block d-lg-none f5 text-white no-underline border border-gray-dark rounded-2 px-2 py-1 mr-3 mr-sm-5"
-                data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;site header&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="4b36d2324966168610931c6e50641323e7f7af98b9c434ea7299c05f6054d64f"
+                data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;site header&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="4b36d2324966168610931c6e50641323e7f7af98b9c434ea7299c05f6054d64f"
                 data-ga-click="Sign up, click to sign up for account, ref_page:/&lt;user-name&gt;/&lt;repo-name&gt;/blob/show;ref_cta:Sign up;ref_loc:header logged out">
                 Sign&nbsp;up
               </a>
@@ -407,15 +407,15 @@
 
           </div>
 
-        <a href="/login?return_to=%2Flevutkin%2Flevutkin.github.io%2Fblob%2Fmaster%2F_research%2Flab.md"
+        <a href="/login?return_to=%2Flevutkin%2Flevutkin.github.io%2Fblob%2Fmaster%2F_research%2FXAI_survival_analysis.md"
           class="HeaderMenu-link no-underline mr-3"
-          data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;site header menu&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="a36e34ef0ec1bda28785d9599385a35a8ad4a518411d518898385dc019586662"
+          data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;site header menu&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="a36e34ef0ec1bda28785d9599385a35a8ad4a518411d518898385dc019586662"
           data-ga-click="(Logged out) Header, clicked Sign in, text:sign-in">
           Sign&nbsp;in
         </a>
             <a href="/join?ref_cta=Sign+up&amp;ref_loc=header+logged+out&amp;ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E%2Fblob%2Fshow&amp;source=header-repo&amp;source_repo=levutkin%2Flevutkin.github.io"
               class="HeaderMenu-link d-inline-block no-underline border border-gray-dark rounded-1 px-2 py-1"
-              data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;site header menu&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="a36e34ef0ec1bda28785d9599385a35a8ad4a518411d518898385dc019586662"
+              data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;site header menu&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="a36e34ef0ec1bda28785d9599385a35a8ad4a518411d518898385dc019586662"
               data-ga-click="Sign up, click to sign up for account, ref_page:/&lt;user-name&gt;/&lt;repo-name&gt;/blob/show;ref_cta:Sign up;ref_loc:header logged out">
               Sign&nbsp;up
             </a>
@@ -503,7 +503,7 @@
       <ul class="pagehead-actions flex-shrink-0 d-none d-md-inline" style="padding: 2px 0;">
 
   <li>
-      <a class="tooltipped tooltipped-s btn btn-sm btn-with-count" aria-label="You must be signed in to watch a repository" rel="nofollow" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;notification subscription menu watch&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;LOG_IN&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="ff2e69914ebbd69fbe71b38b549479ddd338aabed4ac55e71002a96d3150c7f6" href="/login?return_to=%2Flevutkin%2Flevutkin.github.io">
+      <a class="tooltipped tooltipped-s btn btn-sm btn-with-count" aria-label="You must be signed in to watch a repository" rel="nofollow" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;notification subscription menu watch&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;LOG_IN&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="ff2e69914ebbd69fbe71b38b549479ddd338aabed4ac55e71002a96d3150c7f6" href="/login?return_to=%2Flevutkin%2Flevutkin.github.io">
     <svg height="16" class="octicon octicon-eye" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg>
 
     Watch
@@ -515,7 +515,7 @@
   </li>
 
   <li>
-        <a class="btn btn-sm btn-with-count  tooltipped tooltipped-s" aria-label="You must be signed in to star a repository" rel="nofollow" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;star button&quot;,&quot;repository_id&quot;:239492745,&quot;auth_type&quot;:&quot;LOG_IN&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="53f50a6153d13797744247816542598256313326e81d543585e32bdd38c59a95" href="/login?return_to=%2Flevutkin%2Flevutkin.github.io">
+        <a class="btn btn-sm btn-with-count  tooltipped tooltipped-s" aria-label="You must be signed in to star a repository" rel="nofollow" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;star button&quot;,&quot;repository_id&quot;:239492745,&quot;auth_type&quot;:&quot;LOG_IN&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="53f50a6153d13797744247816542598256313326e81d543585e32bdd38c59a95" href="/login?return_to=%2Flevutkin%2Flevutkin.github.io">
       <svg height="16" class="octicon octicon-star v-align-text-bottom" vertical_align="text_bottom" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z"></path></svg>
 
       Star
@@ -528,7 +528,7 @@
   </li>
 
   <li>
-      <a class="btn btn-sm btn-with-count tooltipped tooltipped-s" aria-label="You must be signed in to fork a repository" rel="nofollow" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;repo details fork button&quot;,&quot;repository_id&quot;:239492745,&quot;auth_type&quot;:&quot;LOG_IN&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="5c41ae2305a4c54b4bf29818bc60bada17cf6ce08ea946fb324ee692a6ddc74e" href="/login?return_to=%2Flevutkin%2Flevutkin.github.io">
+      <a class="btn btn-sm btn-with-count tooltipped tooltipped-s" aria-label="You must be signed in to fork a repository" rel="nofollow" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;repo details fork button&quot;,&quot;repository_id&quot;:239492745,&quot;auth_type&quot;:&quot;LOG_IN&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="5c41ae2305a4c54b4bf29818bc60bada17cf6ce08ea946fb324ee692a6ddc74e" href="/login?return_to=%2Flevutkin%2Flevutkin.github.io">
         <svg class="octicon octicon-repo-forked" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 100-1.5.75.75 0 000 1.5z"></path></svg>
         Fork
 </a>
@@ -634,7 +634,7 @@
   
 
 
-    <a class="d-none js-permalink-shortcut" data-hotkey="y" href="/levutkin/levutkin.github.io/blob/592a1e5586d5645d84b75db47c72eb1d2345c9b4/_research/lab.md">Permalink</a>
+    <a class="d-none js-permalink-shortcut" data-hotkey="y" href="/levutkin/levutkin.github.io/blob/592a1e5586d5645d84b75db47c72eb1d2345c9b4/_research/XAI_survival_analysis.md">Permalink</a>
 
     <!-- blob contrib key: blob_contributors:v22:df9812a810967d502ee43df272595aad -->
       <signup-prompt-controller class="signup-prompt-bg rounded-1" data-prompt="signup" hidden>
@@ -650,7 +650,7 @@
         </button>
         <h3 class="pt-2">Join GitHub today</h3>
         <p class="col-6 mx-auto">GitHub is home to over 50 million developers working together to host and review code, manage projects, and build software together.</p>
-        <a class="btn btn-primary" data-ga-click="(Logged out) Sign up prompt, clicked Sign up, text:sign-up" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;files signup prompt&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="e46924a191dc9d69afb94cea9a3ea60501b75d9f5ef07ee20cf189177ca41f35" href="/join?source=prompt-blob-show&amp;source_repo=levutkin%2Flevutkin.github.io">Sign up</a>
+        <a class="btn btn-primary" data-ga-click="(Logged out) Sign up prompt, clicked Sign up, text:sign-up" data-hydro-click="{&quot;event_type&quot;:&quot;authentication.click&quot;,&quot;payload&quot;:{&quot;location_in_page&quot;:&quot;files signup prompt&quot;,&quot;repository_id&quot;:null,&quot;auth_type&quot;:&quot;SIGN_UP&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="e46924a191dc9d69afb94cea9a3ea60501b75d9f5ef07ee20cf189177ca41f35" href="/join?source=prompt-blob-show&amp;source_repo=levutkin%2Flevutkin.github.io">Sign up</a>
       </div>
     </div>
   </signup-prompt-controller>
@@ -669,7 +669,7 @@
     <span class="dropdown-caret"></span>
   </summary>
 
-  <details-menu class="SelectMenu SelectMenu--hasFilter" src="/levutkin/levutkin.github.io/refs/master/_research/lab.md?source_action=show&amp;source_controller=blob" preload>
+  <details-menu class="SelectMenu SelectMenu--hasFilter" src="/levutkin/levutkin.github.io/refs/master/_research/XAI_survival_analysis.md?source_action=show&amp;source_controller=blob" preload>
     <div class="SelectMenu-modal">
       <include-fragment class="SelectMenu-loading" aria-label="Menu is loading">
         <svg class="octicon octicon-octoface anim-pulse" height="32" viewBox="0 0 16 16" version="1.1" width="32" aria-hidden="true"><path fill-rule="evenodd" d="M14.7 5.34c.13-.32.55-1.59-.13-3.31 0 0-1.05-.33-3.44 1.3-1-.28-2.07-.32-3.13-.32s-2.13.04-3.13.32c-2.39-1.64-3.44-1.3-3.44-1.3-.68 1.72-.26 2.99-.13 3.31C.49 6.21 0 7.33 0 8.69 0 13.84 3.33 15 7.98 15S16 13.84 16 8.69c0-1.36-.49-2.48-1.3-3.35zM8 14.02c-3.3 0-5.98-.15-5.98-3.35 0-.76.38-1.48 1.02-2.07 1.07-.98 2.9-.46 4.96-.46 2.07 0 3.88-.52 4.96.46.65.59 1.02 1.3 1.02 2.07 0 3.19-2.68 3.35-5.98 3.35zM5.49 9.01c-.66 0-1.2.8-1.2 1.78s.54 1.79 1.2 1.79c.66 0 1.2-.8 1.2-1.79s-.54-1.78-1.2-1.78zm5.02 0c-.66 0-1.2.79-1.2 1.78s.54 1.79 1.2 1.79c.66 0 1.2-.8 1.2-1.79s-.53-1.78-1.2-1.78z"></path></svg>
@@ -679,7 +679,7 @@
 </details>
 
       <h2 id="blob-path" class="breadcrumb flex-auto min-width-0 text-normal mx-0 mx-md-3 width-full width-md-auto flex-order-1 flex-md-order-none mt-3 mt-md-0">
-        <span class="js-repo-root text-bold"><span class="js-path-segment d-inline-block wb-break-all"><a data-pjax="true" href="/levutkin/levutkin.github.io"><span>levutkin.github.io</span></a></span></span><span class="separator">/</span><span class="js-path-segment d-inline-block wb-break-all"><a data-pjax="true" href="/levutkin/levutkin.github.io/tree/master/_research"><span>_research</span></a></span><span class="separator">/</span><strong class="final-path">lab.md</strong>
+        <span class="js-repo-root text-bold"><span class="js-path-segment d-inline-block wb-break-all"><a data-pjax="true" href="/levutkin/levutkin.github.io"><span>levutkin.github.io</span></a></span></span><span class="separator">/</span><span class="js-path-segment d-inline-block wb-break-all"><a data-pjax="true" href="/levutkin/levutkin.github.io/tree/master/_research"><span>_research</span></a></span><span class="separator">/</span><strong class="final-path">XAI_survival_analysis.md</strong>
       </h2>
         <a href="/levutkin/levutkin.github.io/find/master"
               class="js-pjax-capture-input btn mr-2 d-none d-md-block"
@@ -698,7 +698,7 @@
 </summary>
               <ul class="dropdown-menu dropdown-menu-sw">
               <li class="d-block d-md-none">
-                <a class="dropdown-item d-flex flex-items-baseline" data-hydro-click="{&quot;event_type&quot;:&quot;repository.click&quot;,&quot;payload&quot;:{&quot;target&quot;:&quot;FIND_FILE_BUTTON&quot;,&quot;repository_id&quot;:239492745,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="a8b7f5a527ca2fb4e052e1ba41cea8108beca256a9c868a02b7582c238f55e11" data-ga-click="Repository, find file, location:repo overview" data-hotkey="t" data-pjax="true" href="/levutkin/levutkin.github.io/find/master">
+                <a class="dropdown-item d-flex flex-items-baseline" data-hydro-click="{&quot;event_type&quot;:&quot;repository.click&quot;,&quot;payload&quot;:{&quot;target&quot;:&quot;FIND_FILE_BUTTON&quot;,&quot;repository_id&quot;:239492745,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}" data-hydro-click-hmac="a8b7f5a527ca2fb4e052e1ba41cea8108beca256a9c868a02b7582c238f55e11" data-ga-click="Repository, find file, location:repo overview" data-hotkey="t" data-pjax="true" href="/levutkin/levutkin.github.io/find/master">
                   <span class="flex-auto">Go to file</span>
                   <span class="text-small text-gray" aria-hidden="true">T</span>
 </a>              </li>
@@ -712,7 +712,7 @@
               </li>
               <li class="dropdown-divider" role="none"></li>
               <li>
-                <clipboard-copy value="_research/lab.md" class="dropdown-item cursor-pointer" data-toggle-for="blob-more-options-details">
+                <clipboard-copy value="_research/XAI_survival_analysis.md" class="dropdown-item cursor-pointer" data-toggle-for="blob-more-options-details">
                   Copy path
                 </clipboard-copy>
               </li>
@@ -724,7 +724,7 @@
 
 
     <div class="Box d-flex flex-column flex-shrink-0 mb-3">
-      <include-fragment src="/levutkin/levutkin.github.io/contributors/master/_research/lab.md" class="commit-loader">
+      <include-fragment src="/levutkin/levutkin.github.io/contributors/master/_research/XAI_survival_analysis.md" class="commit-loader">
         <div class="Box-header Box-header--blue d-flex flex-items-center">
             <div class="Skeleton avatar avatar-user flex-shrink-0 ml-n1 mr-n1 mt-n1 mb-n1" style="width:24px;height:24px;"></div>
             <div class="Skeleton Skeleton--text col-5 ml-2">&nbsp;</div>
@@ -755,8 +755,8 @@
   <div class="d-flex py-1 py-md-0 flex-auto flex-order-1 flex-md-order-2 flex-sm-grow-0 flex-justify-between">
 
     <div class="BtnGroup">
-      <a id="raw-url" class="btn btn-sm BtnGroup-item" href="/levutkin/levutkin.github.io/raw/master/_research/lab.md">Raw</a>
-        <a class="btn btn-sm js-update-url-with-hash BtnGroup-item" data-hotkey="b" href="/levutkin/levutkin.github.io/blame/master/_research/lab.md">Blame</a>
+      <a id="raw-url" class="btn btn-sm BtnGroup-item" href="/levutkin/levutkin.github.io/raw/master/_research/XAI_survival_analysis.md">Raw</a>
+        <a class="btn btn-sm js-update-url-with-hash BtnGroup-item" data-hotkey="b" href="/levutkin/levutkin.github.io/blame/master/_research/XAI_survival_analysis.md">Blame</a>
     </div>
 
 
@@ -799,25 +799,26 @@
   </thead>
   <tbody>
   <tr>
-  <td><div>О лаборатории нейросетевых технологий и ИИ</div></td>
+  <td><div>Интерпретация моделей выживаемости</div></td>
   <td><div>research</div></td>
   <td><div></div></td>
   <td><div>/research/lab</div></td>
   <td><div>СПбПУ</div></td>
-  <td><div>2020-01-01</div></td>
+  <td><div>2020-30-06</div></td>
   <td><div></div></td>
   </tr>
   </tbody>
 </table>
 
 <p>Машинное обучение как часть направления искусственного интеллекта является одним из наиболее перспективных и динамично развивающихся областей исследований, результаты которого уже сегодня демонстрируют эффективность в самых различных прикладных областях: в медицине, биологии, робототехнике, в обработке больших объемов данных, в создании автономных систем и устройств, в распознавании речи, поисковых системах и т.д.</p>
-<p>Цель создания научно-исследовательской лаборатории нейросетевых технологий и искусственного интеллекта как научно-образовательного центра превосходства в области искусственного интеллекта и машинного обучения заключается в попытке включиться в технологическую революцию интеллектуальной обработки данных, которая определит и уже определяет будущее развитие самых различных сторон деятельности.</p>
-<p>Лаборатория нейросетевых технологий и искусственного интеллекта создана на базе  Санкт-Петербургского политехнического университета Петра Великого. Сотрудники лаборатории – ведущие ученые и специалисты в области машинного обучения и искусственного интеллекта Санкт-Петербургского политехнического университета Петра Великого, врачи-эксперты в области диагностики онкологических заболеваний из Санкт-Петербургского клинического  научно-практического центра специализированных видов медицинской помощи (онкологический). Основные направления исследований и разработок в рамках лаборатории – интеллектуальные системы диагностики онкологических заболеваний, в частности, рака легкого,  интеллектуальные системы анализа выживаемости и выбора оптимального лечения в рамках концепции персонализированной медицины, обнаружение аномального поведения различных процессов и многие другие модели и алгоритмы машинного обучения, ориентированные на интеллектуализацию различных прикладных задач.</p>
-<p>Лаборатория открыта для студентов, аспирантов, молодых ученых и всех тех, кто хочет внести свой вклад, большой или малый, в развитие и применение новых моделей, новых методов, эффективного программного обеспечения, всех тех, кто готов потратить свое время на обсуждение новых задач, на споры и на поиск новых решений.</p>
-<p>В лаборатории нейросетевых технологий и искусственного интеллекта проводятся семинары, на которых выступают как сотрудники лаборатории, так и гости. Семинары позволяют не только узнать новые результаты в области машинного обучения, участвовать в представлении и анализе новых публикаций, участвовать в презентации собственных результатов, но и услышать критические замечания в отношении своих исследований.</p>
-<p>Важнейшим инструментом и вычислительной базой лаборатории является суперкомпьютерный центр, использование которого позволяет решать задачи большой размерности и выполнять сложные проекты, связанные с обработкой данных.</p>
-<p>Лаборатория нейросетевых технологий и искусственного интеллекта открыта для сотрудничества и партнерства с любыми организациями, учеными, специалистами, целью которых являются фундаментальные и прикладные исследования в области искусственного интеллекта, а также их применение в промышленности, медицине, образовании.</p>
-<p>Лаборатория была создана в рамках гранта Российского Научного Фонда № 18-11-00078 "Разработка новых моделей машинного обучения на основе композиций глубоких лесов и нейронных сетей для решения задач медицинской диагностики"</p>
+<p>Завершен цикл работ по интерпретации моделей машинного обучения для анализа выживаемости (survival analysis). Авторы - аспирант Максим Ковалев и магистрант Эрнест Касимов (уже магистр) и их научный руководитель, являющиеся сотрудниками лаборатории нейросетевых технологий и искусственного интеллекта Политеха.</p> 
+<p>Рассматриваемая задача относится к направлению работ в машинном обучении, которые можно объединить названием «объяснительный интеллект», «модели интерпретации» или «eXplainable Artificial Intelligence (XAI)». Основной задачей, решаемой методами объяснения и интерпретации, является определение наиболее значимых признаков данных, которые привели к определенному решению, выдаваемому моделью машинного обучения (классификатора или регрессора), рассматриваемой как «черный ящик». В работах рассмотрены локальные модели интерпретации и объяснения, когда анализируется решение, связанное с отдельным примером, например, диагноз отдельного пациента. Особенность цикла работ заключается в том, что решение модели машинного обучения - это функция выживаемости или кумулятивная функция риска. Фактически мы пытаемся определить те признаки, которые привели к определенной функции выживаемости (factual explanation) или определить значения каких признаков нужно изменить и как, чтобы получить требуемую функцию выживаемости (counterfactual explanation).</p>  
+<p>Список препринтов и публикаций:</p>  
+<p>1. Kovalev M.S., Utkin L.V., Kasimov E.M. SurvLIME: A method for explaining machine learning survival models // arXiv:2003.08371. Mar. 2020.  https://arxiv.org/abs/2003.08371 </p>
+<p>2. (Расширенная версия, опубликованная в журнале) Kovalev M.S., Utkin L.V., Kasimov E.M. SurvLIME: A method for explaining machine learning survival models // Knowledge-Based Systems, vol. 203, p. 106164, 2020. DOI: 10.1016/j.knosys.2020.106164  https://www.sciencedirect.com/science/article/abs/pii/S095070512030404 </p>
+<p>3. Utkin L.V., Kovalev M.S., Kasimov E.M. SurvLIME-Inf: A simplified modification of SurvLIME for explanation of machine learning survival models // arXiv:2005.02387, May 2020. https://arxiv.org/abs/2005.02387 </p>
+<p>4. Kovalev M.S., Utkin L.V. A robust algorithm for explaining unreliable machine learning survival models using the Kolmogorov-Smirnov bounds // arXiv:2005.02249, May 2020. https://arxiv.org/abs/2005.02249 </p>
+<p>5. Kovalev M.S., Utkin L.V. Counterfactual explanation of machine learning survival models // arXiv:2006., June 2020. </p>
 </article>
   </div>
 
@@ -839,9 +840,9 @@
      hidden
      data-tagsearch-url="/levutkin/levutkin.github.io/find-symbols"
      data-tagsearch-ref="master"
-     data-tagsearch-path="_research/lab.md"
+     data-tagsearch-path="_research/XAI_survival_analysis.md"
      data-tagsearch-lang="Markdown"
-     data-hydro-click="{&quot;event_type&quot;:&quot;code_navigation.click_on_symbol&quot;,&quot;payload&quot;:{&quot;action&quot;:&quot;click_on_symbol&quot;,&quot;repository_id&quot;:239492745,&quot;ref&quot;:&quot;master&quot;,&quot;language&quot;:&quot;Markdown&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/lab.md&quot;,&quot;user_id&quot;:null}}"
+     data-hydro-click="{&quot;event_type&quot;:&quot;code_navigation.click_on_symbol&quot;,&quot;payload&quot;:{&quot;action&quot;:&quot;click_on_symbol&quot;,&quot;repository_id&quot;:239492745,&quot;ref&quot;:&quot;master&quot;,&quot;language&quot;:&quot;Markdown&quot;,&quot;originating_url&quot;:&quot;https://github.com/levutkin/levutkin.github.io/blob/master/_research/XAI_survival_analysis.md&quot;,&quot;user_id&quot;:null}}"
      data-hydro-click-hmac="7802ce97cc328401a7f3fe1437eea1dcf7b1063eb7d091afd38083681f3446dc">
   <div class="Popover-message Popover-message--large Popover-message--top-left TagsearchPopover mt-1 mb-4 mx-auto Box box-shadow-large">
     <div class="TagsearchPopover-content js-tagsearch-popover-content overflow-auto" style="will-change:transform;">
