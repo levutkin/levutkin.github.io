@@ -18,7 +18,7 @@ location: ""
 **Список препринтов и публикаций:**
 
 1. Kovalev M.S., Utkin L.V., Kasimov E.M. SurvLIME: A method for explaining machine learning survival models // arXiv:2003.08371. Mar. 2020.  <https://arxiv.org/abs/2003.08371/>
-2. (Расширенная версия, опубликованная в журнале) Kovalev M.S., Utkin L.V., Kasimov E.M. SurvLIME: A method for explaining machine learning survival models // Knowledge-Based Systems, vol. 203, p. 106164, 2020. DOI: 10.1016/j.knosys.2020.106164  <https://www.sciencedirect.com/science/article/abs/pii/S095070512030404/>
+2. (Расширенная версия, опубликованная в журнале) Kovalev M.S., Utkin L.V., Kasimov E.M. SurvLIME: A method for explaining machine learning survival models // Knowledge-Based Systems, vol. 203, p. 106164, 2020. DOI: 10.1016/j.knosys.2020.106164  <https://www.sciencedirect.com/science/article/pii/S0950705120304044/>
 3. Utkin L.V., Kovalev M.S., Kasimov E.M. SurvLIME-Inf: A simplified modification of SurvLIME for explanation of machine learning survival models // arXiv:2005.02387, May 2020. <https://arxiv.org/abs/2005.02387/>
 4. Kovalev M.S., Utkin L.V. A robust algorithm for explaining unreliable machine learning survival models using the Kolmogorov-Smirnov bounds // arXiv:2005.02249, May 2020. <https://arxiv.org/abs/2005.02249/>
 5. Kovalev M.S., Utkin L.V. Counterfactual explanation of machine learning survival models // arXiv:2006., June 2020.
