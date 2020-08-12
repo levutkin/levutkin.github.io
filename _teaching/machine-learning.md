@@ -25,6 +25,6 @@ location: ""
  15. [Сеть Хопфилда, ограниченная машина Больцмана, рекуррентная нейронная сеть.](/files/Machine_Learning_LTU_15.pdf)
  16. [Сегментация изобржений](/files/Machine_Learning_LTU_16.pdf)
  17. [Обучение на одном примере (One-shot learning).](/files/Machine_Learning_LTU_19.pdf)
- 18. [Объяснительный интеллект (Explainable AI).](/files/Machine_Learning_LTU_20_Explain_ML2.pdf)
+ 18. [Объяснительный интеллект (Explainable AI).](/files/Machine_Learning_SPbPU_XAI.pdf)
  19. [7 приемов для более эффективного обучения нейронных сетей.](/files/Machine_Learning_LTU_14_2.pdf)
  
