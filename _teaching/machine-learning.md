@@ -8,7 +8,7 @@ date: 2015-01-01
 location: ""
 ---
 
-    [Общее введение.](/files/AI_Introduction_2.pdf)
+ 0. [Общее введение.](/files/AI_Introduction_2.pdf)
  1. [Введение.](/files/Machine_Learning_LTU_1.pdf)
  2. [Наивный байесовский классификатор и метод ближайших соседей.](/files/Machine_Learning_LTU_2.pdf)
  3. [Метод опорных векторов.](/files/Machine_Learning_LTU_3.pdf)
