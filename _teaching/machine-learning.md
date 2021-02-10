@@ -8,6 +8,7 @@ date: 2015-01-01
 location: ""
 ---
 
+    [Общее введение.](/files/AI_Introduction_2.pdf)
  1. [Введение.](/files/Machine_Learning_LTU_1.pdf)
  2. [Наивный байесовский классификатор и метод ближайших соседей.](/files/Machine_Learning_LTU_2.pdf)
  3. [Метод опорных векторов.](/files/Machine_Learning_LTU_3.pdf)
@@ -27,4 +28,5 @@ location: ""
  17. [Обучение на одном примере (One-shot learning).](/files/Machine_Learning_LTU_19.pdf)
  18. [Объяснительный интеллект (Explainable AI).](/files/Machine_Learning_SPbPU_XAI.pdf)
  19. [7 приемов для более эффективного обучения нейронных сетей.](/files/Machine_Learning_LTU_14_2.pdf)
+ 20. [Деформирующий автокодер.](/files/Deforming_autoencoder.pdf)
  
