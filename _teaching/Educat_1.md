@@ -82,7 +82,7 @@ utkin_lv@spbstu.ru
 
 ***ссылки на сайт СПбПУ:*** 
 
-<https://iamm.spbstu.ru/edu/02.04.01/02.04.01_03/>
+<https://icst.spbstu.ru/edu/02.04.01/02.04.01_03/>
 
 <https://dep.spbstu.ru/edu/02.04.01/02.04.01_03/>
 
