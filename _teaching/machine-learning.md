@@ -9,8 +9,8 @@ location: ""
 ---
 
  0. [Общее введение.](/files/AI_Introduction_2.pdf)
- 1. [Введение.](/files/Machine_Learning_LTU_1.pdf)
- 2. [Наивный байесовский классификатор и метод ближайших соседей.](/files/Machine_Learning_LTU_2.pdf)
+ 1. [Введение.](/files/Machine_Learning_Intro.pdf)
+ 2. [Наивный байесовский классификатор и метод ближайших соседей.](/files/Machine_Learning_Bayes_KNN.pdf)
  3. [Метод опорных векторов.](/files/Machine_Learning_LTU_3.pdf)
  4. [Деревья решений.](/files/Machine_Learning_LTU_4.pdf)
  5. [Нейронные сети.](/files/Machine_Learning_LTU_5.pdf)
