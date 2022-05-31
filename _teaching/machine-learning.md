@@ -31,4 +31,5 @@ location: ""
  20. [7 приемов для более эффективного обучения нейронных сетей.](/files/Machine_Learning_7_tricks_to_learn.pdf)
  21. [Деформирующий автокодер.](/files/Deforming_autoencoder.pdf)
  22. [Distillation and Batch Normalization.](/files/Machine_Learning_Distil_BN.pdf)
+ 23. [Модели внимания и трансформеры.](/files/Machine_Learning_Attention.pdf)
  
