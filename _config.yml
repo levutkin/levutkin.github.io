@@ -10,7 +10,7 @@ locale                   : "en-US"
 title                    : "Home page of Lev V. Utkin"
 title_separator          : "-"
 name                     : "Lev Utkin"
-description              : "Professor, Higher School of Artificial Intelligence, Head of the Institute of Computer Science and Technology, Peter the Great St. Petersburg Polytechnic University"
+description              : "Professor, Higher School of Artificial Intelligence, Institute of Computer Science and Technology, Peter the Great St. Petersburg Polytechnic University"
 url                      :  
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "academicpages/academicpages.github.io"
@@ -82,7 +82,7 @@ analytics:
 author:
   name             : "Lev Utkin"
   avatar           : "Utkin.jpg"
-  bio              : "Professor, Higher School of Artificial Intelligence, Head of the Institute of Computer Science and Technology, Peter the Great St. Petersburg Polytechnic University"
+  bio              : "Professor, Higher School of Artificial Intelligence, Institute of Computer Science and Technology, Peter the Great St. Petersburg Polytechnic University"
   location         : "St. Petersburg"
   employer         : "SPbPU"
   pubmed           : 
