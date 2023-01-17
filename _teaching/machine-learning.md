@@ -26,7 +26,7 @@ location: ""
  15. [Глубокое обучение: Cверточные сети.](/files/Machine_Learning_ConvN.pdf)
  16. [Глубокое обучение: Архитектуры сверточных сетей.](/files/Machine_Learning_ConvN_Archit.pdf)
  17. [Сеть Хопфилда, ограниченная машина Больцмана, рекуррентная нейронная сеть.](/files/Machine_Learning_Hopfield_etc.pdf)
- 18. [Сегментация изобржений.](/files/Machine_Learning_Segment.pdf)
+ 18. [Сегментация изображений.](/files/Machine_Learning_Segment.pdf)
  19. [Детекция изображений.](/files/Machine_Learning_Detection.pdf)
  20. [Обучение на одном примере (One-shot learning).](/files/Machine_Learning_One_Shot.pdf)
  21. [Функции потерь и показатели качества моделей.](/files/Machine_Learning_Losses.pdf)
