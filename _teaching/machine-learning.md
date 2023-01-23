@@ -18,7 +18,7 @@ location: ""
  7. [Композиционные методы машинного обучения.](/files/Machine_Learning_Ensemble.pdf)
  8. [Регрессионные модели.](/files/Machine_Learning_Regression.pdf)
  9. [Автокодеры.](/files/Machine_Learning_Autoencoder.pdf)
- 10. [Передача обучения и адаптация данных.](/files/Machine_Learning_LTU_10.pdf)
+ 10. [Передача обучения и адаптация данных (Transfer Learning).](/files/Machine_Learning_Transfer_Learning.pdf)
  11. [Визуализация данных с использованием tSNE.](/files/Machine_Learning_Dim_Red.pdf)
  12. [Обучение с подкреплением.](/files/Machine_Learning_LTU_12.pdf)
  13. [Порождающие модели: вариационный автокодер.](/files/Machine_Learning_Gen_Learn.pdf)
