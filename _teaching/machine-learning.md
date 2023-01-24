@@ -34,7 +34,7 @@ location: ""
  24. [Неопределенность и калибровка.](/files/Machine_Learning_Uncert.pdf)
  25. [Объяснительный интеллект (Explainable AI).](/files/Machine_Learning_SPbPU_XAI.pdf)
  26. [7 приемов для более эффективного обучения нейронных сетей.](/files/Machine_Learning_7_tricks_to_learn.pdf)
- 27. [Деформирующий автокодер.](/files/Deforming_autoencoder.pdf)
+ 27. [Деформирующий автокодер и распутывание (Disentangling).](/files/Deforming_autoencoder.pdf)
  28. [Distillation and Batch Normalization.](/files/Machine_Learning_Distil_BN.pdf)
  29. [Модели внимания и трансформеры.](/files/Machine_Learning_Attention.pdf)
  30. [Графовые нейронные сети.](/files/Machine_Learning_GraphNN.pdf)
