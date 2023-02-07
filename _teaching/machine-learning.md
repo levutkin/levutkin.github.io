@@ -32,7 +32,7 @@ location: ""
  22. [Обучение на одном примере (One-shot learning).](/files/Machine_Learning_One_Shot.pdf)
  23. [Функции потерь и показатели качества моделей.](/files/Machine_Learning_Losses.pdf)
  24. [Неопределенность и калибровка.](/files/Machine_Learning_Uncert.pdf)
- 25. [Объяснительный интеллект (Explainable AI).](/files/Machine_Learning_SPbPU_XAI.pdf)
+ 25. [Объяснительный интеллект (Explainable AI).](/files/Machine_Learning_XAI.pdf)
  26. [7 приемов для более эффективного обучения нейронных сетей.](/files/Machine_Learning_7_tricks_to_learn.pdf)
  27. [Деформирующий автокодер и распутывание (Disentangling).](/files/Deforming_autoencoder.pdf)
  28. [Distillation and Batch Normalization.](/files/Machine_Learning_Distil_BN.pdf)
