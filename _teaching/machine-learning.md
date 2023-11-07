@@ -20,7 +20,7 @@ location: ""
  9. [Автокодеры.](/files/Machine_Learning_Autoencoder.pdf)
  10. [Передача обучения и адаптация данных (Transfer Learning).](/files/Machine_Learning_Transfer_Learning.pdf)
  11. [Визуализация данных с использованием tSNE.](/files/Machine_Learning_Dim_Red.pdf)
- 12. [Обучение с подкреплением.](/files/Machine_Learning_LTU_12.pdf)
+ 12. [Обучение с подкреплением.](/files/Machine_Learning_RL.pdf)
  13. [Порождающие модели: вариационный автокодер.](/files/Machine_Learning_Gen_Learn.pdf)
  15. [Порождающие модели: GAN.](/files/Machine_Learning_GAN.pdf)
  16. [Порождающие модели: Диффузионные модели.](/files/Machine_Learning_Diffusion.pdf)
