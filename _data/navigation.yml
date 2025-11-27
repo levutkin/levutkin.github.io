@@ -3,8 +3,8 @@ main:
   - title: "Publications"
     url: /publications.html
 
-%  - title: "Publications in Russian (2017-2019)"
-%    url: /Publicationsrus.html
+#  - title: "Publications in Russian (2017-2019)"
+#    url: /Publicationsrus.html
     
   - title: "Research"
     url: /research/
