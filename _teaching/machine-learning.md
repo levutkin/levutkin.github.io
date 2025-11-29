@@ -38,4 +38,5 @@ location: ""
  28. [Distillation and Batch Normalization.](/files/Machine_Learning_Distil_BN.pdf)
  29. [Модели внимания и трансформеры.](/files/Machine_Learning_Attention.pdf)
  30. [Графовые нейронные сети.](/files/Machine_Learning_GraphNN.pdf)
+ 31. [Модели Mixture-of-Experts.](/files/Mixture_of_Experts.pdf)
  
